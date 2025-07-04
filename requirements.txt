@@ -1,0 +1,9 @@
+pyexcel_ods
+pandas
+matplotlib
+seaborn
+statsmodels
+scipy
+mne
+numpy
+pyexcel_ods
