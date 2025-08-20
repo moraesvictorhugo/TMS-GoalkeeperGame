@@ -19,9 +19,9 @@ STEP 0 - Importing Data and Setting Flags
 ============================================
 """
 # Setting flags
-volunteer_number = 'V12'         # Change volunteer number for analysis
-bool_export = True              # Change to export data to CSV
-bool_plots = False                # Change to plot data
+volunteer_number = 'V15'         # Change volunteer number for analysis
+bool_export = True               # Change to export data to CSV
+bool_plots = False               # Change to plot data
 exclusion_method = 'RMS'         # Choose between (outliers or RMS)
 rms_thresh = 2                   # in standard deviations. Used for both FDI and FDS exclusion criteria when exclusion_method = 'RMS'
 
