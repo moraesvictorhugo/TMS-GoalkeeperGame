@@ -20,8 +20,8 @@ STEP 0 - Importing Data and Setting Flags
 """
 # Setting flags
 volunteer_number = 'V15'         # Change volunteer number for analysis
-bool_export = True               # Change to export data to CSV
-bool_plots = False               # Change to plot data
+bool_export = False               # Change to export data to CSV
+bool_plots = True               # Change to plot data
 exclusion_method = 'RMS'         # Choose between (outliers or RMS)
 rms_thresh = 2                   # in standard deviations. Used for both FDI and FDS exclusion criteria when exclusion_method = 'RMS'
 
@@ -52,8 +52,8 @@ data_filtered = signal_processing.create_filtered_raw_object(bandpass_filter, ra
 
 # Add annotations from the original raw data and plot filtered data
 data_filtered = utils.add_annotations_to_filtered(data_filtered, raw_notch)
-if bool_plots:
-    data_filtered.plot()
+# if bool_plots:
+#     data_filtered.plot()
 
 ## Verify markers
 utils.marker_verification(raw, data_filtered)
