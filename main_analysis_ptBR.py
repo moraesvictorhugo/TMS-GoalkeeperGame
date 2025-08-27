@@ -19,8 +19,8 @@ import matplotlib.pyplot as plt
 # ============================================
 # """
 ## Importing processed csv file
-file_path = "/home/victormoraes/MEGA/Archive/IBCCF/Projeto Doc/EMT no Jogo do goleiro/Data processing/TMS-GKg_Analysis/data_TMS-GKg/Processed_data/2025-02-17/"
-file_name = "df_gklab.csv"
+file_path = '/home/victormoraes/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-08-27'
+file_name = "df_all_data_processed.csv"
 df = import_signal.import_csv_data(file_path, file_name)
 
 ## Setting flags and filtering data
@@ -28,7 +28,7 @@ type_analysis = 'group'                  # "individual" or "group"
 volunteer_id = 1                          # adjust according to the volunteer number
 remove_familiarization_trials = True      # Remove familiarization trials
 lst_excluded_volunteers = []
-change_location_br = True
+change_location_br = False
 remove_block = []                         # Remove undesired block for analysis
 
 if change_location_br:
@@ -76,7 +76,7 @@ df = analysis.create_context_column(df)
 new_order = ['group_info', 'day_info', 'play_info', 'step_info', 'tree_info',
        'ID_info', 'response_time_info', 'response_info',
        'stochastic_chain_info', 'result', 'last_was_error', 'context', 
-       'block_info', 'tms_pulse','MEPpp_FDI_��V', 'MEPpp_FDS_��V',
+       'block_info', 'tms_pulse','MEPpp_FDI_µV', 'MEPpp_FDS_µV',
        'relRest_MEPpp_FDI', 'relRest_MEPpp_FDS', 'relMean_MEPpp_FDI',
        'relMean_MEPpp_FDS', 'FDImep_outGame', 'FDSmep_outGame']
 

@@ -36,5 +36,5 @@ def import_csv_data(file_path, file_name):
     Returns:
         pd.DataFrame: The imported DataFrame.
     """
-    return pd.read_csv(file_path + '/' + file_name, encoding='utf-7')
+    return pd.read_csv(file_path + '/' + file_name)
    
