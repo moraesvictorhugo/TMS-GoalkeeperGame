@@ -28,8 +28,9 @@ type_analysis = 'group'                  # "individual" or "group"
 volunteer_id = 1                          # adjust according to the volunteer number
 remove_familiarization_trials = True      # Remove familiarization trials
 lst_excluded_volunteers = []
-change_location_br = False
+change_location_br = True
 remove_block = []                         # Remove undesired block for analysis
+export_data = False
 
 if change_location_br:
     # Set locale to use comma as decimal separator (e.g., Brazilian locale)
@@ -86,8 +87,9 @@ df = df[new_order]
 # Count excluded trials for each volunteer
 excluded_trials_volunteers = utils.count_nan_by_id(df, 'ID_info', ['response_time_info', 'relMean_MEPpp_FDI'])
 
-# Export data frame as csv
-export_data.export_to_csv(df, 'df_gklab_analysis_20250611.csv')
+# Export data frame as csv to apply statistical analysis
+if export_data:
+    export_data.export_to_csv(df, 'df_gklab_analysis_20250828.csv')
 
 # """
 # ============================================
@@ -147,7 +149,7 @@ plot_data.boxplotDot_dataframe_onecategory(
     ylabel='Tempo de resposta (seg)',     
     title=' ',
     figsize=(10, 6),
-    ylim=(0.2, 1)
+    #ylim=(0.2, 1)
 )
 
 ############################################# Response Times With TMS and Without TMS
@@ -196,7 +198,7 @@ plot_data.boxplotDot_dataframe_onecategory(
     ylabel='Response Times (sec)',     
     title='RTs with EMT by Context',
     figsize=(10, 6),
-    ylim=(0.25, 0.75)
+    #ylim=(0.25, 0.75)
 )
 
 ############################################# Plot RTs without EMT by Context
@@ -326,7 +328,7 @@ plot_data.boxplotDotandDashlinezero_dataframe_onecategory(
     ylabel='RT after error − after success',     
     title='TRs após erro − TRs após sucesso com EMT',
     figsize=(10, 6),
-    ylim=(-0.3, 0.2)
+    #ylim=(-0.3, 0.2)
 )
 
 ############################################# Plot RTs without EMT by Context and Previous result
@@ -418,8 +420,8 @@ plot_data.boxplotDot_dataframe_onecategory(
     df=mean_relmFDImepsmean_ctx,
     x= 'context',
     y= 'relMean_MEPpp_FDI',
-    xlabel='Context',         
-    ylabel='FDI relative MEPs',     
+    xlabel='Contexto',         
+    ylabel='PEMs relativos no PID',     
     title=' ',
     figsize=(10, 6)
 )
@@ -433,7 +435,7 @@ plot_data.boxplotDotandDashline_dataframe_onecategory(
     ylabel='PEMs relativos no PID',     
     title=' ',
     figsize=(10, 6),
-    ylim=(0.90, 1.20)
+    #ylim=(0.90, 1.20)
 )
 
 ############################################# MEPs by Contexts - FDS
@@ -445,8 +447,8 @@ plot_data.boxplotDot_dataframe_onecategory(
     df=mean_relmFDSmepsmean_ctx,
     x= 'context',
     y= 'relMean_MEPpp_FDS',
-    xlabel='Context',         
-    ylabel='FDS relative MEPs',     
+    xlabel='Contexto',         
+    ylabel='PEMs relativos no FSD',     
     title=' ',
     figsize=(10, 6)
 )
@@ -460,9 +462,8 @@ plot_data.boxplotDotandDashline_dataframe_onecategory(
     ylabel='PEMs relativos no FSD',     
     title=' ',
     figsize=(10, 6),
-    ylim=(0.90, 1.20)
+    #ylim=(0.90, 1.20)
 )
-
 
 ############################################# MEPs by Context and Previous Result Analysis
 
