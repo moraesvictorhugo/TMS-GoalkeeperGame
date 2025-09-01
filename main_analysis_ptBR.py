@@ -411,6 +411,36 @@ plot_data.boxplotDot_dataframe_onecategory(
     figsize=(10, 6)
 )
 
+############################################# FDI MEPs by Response
+
+# Calculate mean FDI MEPs grouped by ID_info and response
+mean_FDImeps_by_response = meps_blocks_df.groupby(['ID_info', 'response_info'])['relMean_MEPpp_FDI'].mean().reset_index()
+
+plot_data.boxplotDot_dataframe_onecategory(
+    df=mean_FDImeps_by_response,
+    x= 'response_info',
+    y= 'relMean_MEPpp_FDI',
+    xlabel='Resposta',         
+    ylabel='PEMs relativos no PID',     
+    title=' ',
+    figsize=(10, 6)
+)
+
+############################################# FDS MEPs by Blocks
+
+# Calculate mean FDS MEPs grouped by ID_info and block_info
+mean_FDSmeps_by_blocks = meps_blocks_df.groupby(['ID_info', 'response_info'])['relMean_MEPpp_FDS'].mean().reset_index()
+
+plot_data.boxplotDot_dataframe_onecategory(
+    df=mean_FDSmeps_by_blocks,
+    x= 'response_info',
+    y= 'relMean_MEPpp_FDS',
+    xlabel='Resposta',         
+    ylabel='PEMs relativos no FSD',     
+    title=' ',
+    figsize=(10, 6)
+)
+
 ############################################# MEPs by Contexts - FDI
 
 # Get Mean FDI MEPs relative to mean by Contexts and Plot    
