@@ -323,8 +323,8 @@ def plot_success_rates_by_blocks_group(df):
 
     # Add titles and labels
     plt.title(' ', fontsize=16)
-    plt.xlabel('Bloco', fontsize=14)
-    plt.ylabel('Taxa de acerto', fontsize=14)
+    plt.xlabel('Block', fontsize=14)
+    plt.ylabel('Success Rate', fontsize=14)
     
     # Set y-axis limits from 0 to 1 for better visualization
     plt.ylim(0.3, 1)
@@ -334,7 +334,7 @@ def plot_success_rates_by_blocks_group(df):
     plt.yticks(fontsize=12)  # Y-axis tick labels
 
     # Create a legend with unique entries for volunteers
-    plt.legend(handles=handles, title="Voluntários", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.legend(handles=handles, title="Volunteer", bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # Remove right and upper spines
     ax.spines['right'].set_visible(False)  # Remove right spine

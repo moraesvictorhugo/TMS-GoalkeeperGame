@@ -28,7 +28,7 @@ type_analysis = 'group'                  # "individual" or "group"
 volunteer_id = 1                          # adjust according to the volunteer number
 remove_familiarization_trials = True      # Remove familiarization trials
 lst_excluded_volunteers = []
-change_location_br = True
+change_location_br = False
 remove_block = []                         # Remove undesired block for analysis
 export_data = False
 
@@ -313,9 +313,9 @@ plot_data.boxplotDotandDash_dataframe_onecategory(
     df=stacked_df,
     x= 'context',
     y= 'mean_difference',
-    xlabel='Contexto',         
-    ylabel='TR erro − TR acerto',     
-    title='TRs após erro − TRs após sucesso com EMT',
+    xlabel='Context',         
+    ylabel='Post error RT − Post success RT',     
+    title='Post error RT − Post success RT with TMS Pulses',
     figsize=(10, 6)
 )
 
@@ -325,8 +325,8 @@ plot_data.boxplotDotandDashlinezero_dataframe_onecategory(
     y= 'mean_difference',
     subject_id= 'ID_info',
     xlabel='Context',         
-    ylabel='RT after error − after success',     
-    title='TRs após erro − TRs após sucesso com EMT',
+    ylabel='Post error RT − Post success RT',     
+    title='Post error RT − Post success RT with TMS Pulses',
     figsize=(10, 6),
     #ylim=(-0.3, 0.2)
 )
@@ -532,8 +532,8 @@ plot_data.boxplotDotandDash_dataframe_onecategory(
     df=stacked_df,
     x= 'context',
     y= 'mean_difference',
-    xlabel='Contexto',         
-    ylabel='PEMs relativos no PID após erro − após sucesso',     
+    xlabel='Context',         
+    ylabel='Post error relative MEP − Post success relative MEP',     
     title=' ',
     figsize=(10, 6)
 )
@@ -544,7 +544,7 @@ plot_data.boxplotDotandDashlinezero_dataframe_onecategory(
     y= 'mean_difference',
     subject_id= 'ID_info',
     xlabel='Context',         
-    ylabel='FDI relative MEPs after error − after success',     
+    ylabel='Post error relative MEP − Post success relative MEP',     
     title=' ',
     figsize=(10, 6)
 )
