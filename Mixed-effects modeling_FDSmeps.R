@@ -15,7 +15,7 @@ full_path <- file.path(file_path, file_name)
 df <- read.csv(full_path, header = TRUE, stringsAsFactors = FALSE)
 
 # Droping rows with NaN
-df <- subset(df, !is.na(relMean_MEPpp_FDI) & !is.na(context))
+df <- subset(df, !is.na(relMean_MEPpp_FDS) & !is.na(context))
 
 # Removing invalid MEPs rows
 df <- df %>% filter(!block_info %in% c(1, 3, 5))
@@ -24,24 +24,24 @@ df <- df %>% filter(!block_info %in% c(1, 3, 5))
 df$context <- as.factor(df$context)
 
 # Check normality
-hist(df$relMean_MEPpp_FDI, breaks=30, main="FDI MEP Distribution")
+hist(df$relMean_MEPpp_FDS, breaks=30, main="FDS MEP Distribution")
 
 # Check Q-Q plot
-qqnorm(df$relMean_MEPpp_FDI, main = "Q-Q Plot of relMean_MEPpp_FDI")
-qqline(df$relMean_MEPpp_FDI, col = "red")
+qqnorm(df$relMean_MEPpp_FDS, main = "Q-Q Plot of relMean_MEPpp_FDS")
+qqline(df$relMean_MEPpp_FDS, col = "red")
 
-# Log transformation of FDI MEPs
-df$relMean_MEPpp_FDI_log <- log(df$relMean_MEPpp_FDI)
+# Log transformation of FDS MEPs
+df$relMean_MEPpp_FDS_log <- log(df$relMean_MEPpp_FDS)
 
 # Check normality
-hist(df$relMean_MEPpp_FDI_log, breaks=30, main="Log FDI MEP Distribution")
+hist(df$relMean_MEPpp_FDS_log, breaks=30, main="Log FDS MEP Distribution")
 
 # Check Q-Q plot
-qqnorm(df$relMean_MEPpp_FDI_log, main = "Q-Q Plot of Log relMean_MEPpp_FDI")
-qqline(df$relMean_MEPpp_FDI_log, col = "red")
+qqnorm(df$relMean_MEPpp_FDS_log, main = "Q-Q Plot of Log relMean_MEPpp_FDS")
+qqline(df$relMean_MEPpp_FDS_log, col = "red")
 
 # Model
-df.model = lmer(relMean_MEPpp_FDI_log ~ context + (1|ID_info), data=df, REML = FALSE)
+df.model = lmer(relMean_MEPpp_FDS_log ~ context + (1|ID_info), data=df, REML = FALSE)
 
 # Print
 summary(df.model)
@@ -75,7 +75,7 @@ qqline(ranef_df[,1])
 
 # To view the fixed effects
 plot_model(df.model, type = "est", show.values = TRUE, value.offset = 0.3,
-           title = "Fixed Effects Estimates (log FDI MEPs)",
+           title = "Fixed Effects Estimates (log FDS MEPs)",
            axis.labels = rev(c("context20", "context10", "context2", "context1")))
 
 # Plot estimated marginal means (predicted averages)
@@ -83,7 +83,7 @@ emm_context <- emmeans(df.model, ~ context)
 summary(emm_context)
 plot(emm_context, comparisons = TRUE)
 
-ggplot(df, aes(x = context, y = relMean_MEPpp_FDI_log, color = ID_info, group = ID_info)) +
+ggplot(df, aes(x = context, y = relMean_MEPpp_FDS_log, color = ID_info, group = ID_info)) +
   geom_line(alpha = 0.4) +
   stat_summary(fun = mean, geom = "point", size = 4, color = "black") +
   labs(title = "Observed log(RT) by Context and Participant",
@@ -92,11 +92,11 @@ ggplot(df, aes(x = context, y = relMean_MEPpp_FDI_log, color = ID_info, group = 
 
 # Testing model without last_was_error effect
 # Full model
-model_full <- lmer(relMean_MEPpp_FDI_log ~ context + (1 | ID_info),
+model_full <- lmer(relMean_MEPpp_FDS_log ~ context + (1 | ID_info),
                    data = df, REML = FALSE)
 
 # Reduced model (without last_was_error)
-model_reduced <- lmer(relMean_MEPpp_FDI_log ~ 1 + (1 | ID_info),
+model_reduced <- lmer(relMean_MEPpp_FDS_log ~ 1 + (1 | ID_info),
                       data = df, REML = FALSE)
 
 anova(model_reduced, model_full)

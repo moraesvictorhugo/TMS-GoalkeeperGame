@@ -27,10 +27,13 @@ df = import_signal.import_csv_data(file_path, file_name)
 type_analysis = 'group'                  # "individual" or "group"
 volunteer_id = 1                          # adjust according to the volunteer number
 remove_familiarization_trials = True      # Remove familiarization trials
-lst_excluded_volunteers = [6, 10]
+lst_excluded_volunteers = [6, 10, 1, 2, 5, 7, 8, 9, 11]  
+# Groups
+# [6, 10, 1, 2, 5, 7, 8, 9, 11]
+# [6, 10, 3, 4, 12, 13, 14, 15, 16]
 change_location_br = False
 remove_block = []                         # Remove undesired block for analysis
-export_data = False
+export_df = True
 
 if change_location_br:
     # Set locale to use comma as decimal separator (e.g., Brazilian locale)
@@ -88,8 +91,8 @@ df = df[new_order]
 excluded_trials_volunteers = utils.count_nan_by_id(df, 'ID_info', ['response_time_info', 'relMean_MEPpp_FDI'])
 
 # Export data frame as csv to apply statistical analysis
-if export_data:
-    export_data.export_to_csv(df, 'df_gklab_analysis_20250828.csv')
+if export_df:
+    export_data.export_to_csv(df, 'df_gklab_analysis_20251118_worstSubGroup.csv')
 
 # """
 # ============================================

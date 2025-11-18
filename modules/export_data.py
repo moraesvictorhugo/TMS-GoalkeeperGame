@@ -38,9 +38,8 @@ def create_df_from_dict(variables_dict):
 # })
 #     return df_GKlab
 
-def export_to_csv(data, filename):
+def export_to_csv(df, filename):
     """Exports data to a CSV file."""
-    df = pd.DataFrame(data)
     df.to_csv(filename, index=False)
 
 def export_to_GKlab_csv(data, filename):
