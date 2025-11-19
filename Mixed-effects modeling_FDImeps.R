@@ -1,7 +1,8 @@
 library(lme4)
 library(dplyr)
 library(emmeans)
-set_emm_options(pbkrtest.limit = 9082)
+emm_options(pbkrtest.limit = Inf)
+emm_options(lmerTest.limit = Inf)
 library(sjPlot)
 library(ggplot2)
 
@@ -86,7 +87,7 @@ ggplot(df, aes(x = context, y = relMean_MEPpp_FDI_log, color = ID_info, group = 
 
 # Testing model without last_was_error effect
 # Full model
-model_full <- lmer(relMean_MEPpp_FDI_log ~ context + last_was_error + (1 | ID_info),
+model_full <- lmer(relMean_MEPpp_FDI_log ~ context + (1 | ID_info),
                    data = df, REML = FALSE)
 
 # Reduced model (without last_was_error)
