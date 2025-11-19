@@ -71,26 +71,7 @@ hist(ranef_df[,1], breaks=20, main="Random Intercepts Distribution", xlab="Inter
 qqnorm(ranef_df[,1])
 qqline(ranef_df[,1])
 
-# Ploting results -> developing!!
-
-# To view the fixed effects
-plot_model(df.model, type = "est", show.values = TRUE, value.offset = 0.3,
-           title = "Fixed Effects Estimates (log FDI MEPs)",
-           axis.labels = rev(c("context20", "context10", "context2", "context1")))
-
-# Plot estimated marginal means (predicted averages)
-emm_context <- emmeans(df.model, ~ context)
-summary(emm_context)
-plot(emm_context, comparisons = TRUE)
-
-ggplot(df, aes(x = context, y = relMean_MEPpp_FDI_log, color = ID_info, group = ID_info)) +
-  geom_line(alpha = 0.4) +
-  stat_summary(fun = mean, geom = "point", size = 4, color = "black") +
-  labs(title = "Observed log(RT) by Context and Participant",
-       y = "log(Response Time)", x = "Context") +
-  theme_minimal(base_size = 14)
-
-# Testing model without last_was_error effect
+# Comparing models
 # Full model
 model_full <- lmer(relMean_MEPpp_FDI_log ~ context + (1 | ID_info),
                    data = df, REML = FALSE)
@@ -100,4 +81,3 @@ model_reduced <- lmer(relMean_MEPpp_FDI_log ~ 1 + (1 | ID_info),
                       data = df, REML = FALSE)
 
 anova(model_reduced, model_full)
-
