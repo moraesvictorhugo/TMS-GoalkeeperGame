@@ -27,16 +27,16 @@ library(emmeans)
 # 2. Importação e pré-processamento dos dados
 ###############################################################
 
-df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms.csv")
+df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
 
 # Filtrar e preparar dados (versão sem bloco)
 df_clean <- df %>%
   filter(type_block == "Pulse") %>%                       # Apenas trials com pulso TMS
-  select(volunteer, trial, relMean_MEPpp_FDI, context,
+  select(volunteer, trial, MEPpp_FDI_µV, context,
          last_random_was_error) %>%                       # Seleção de colunas
   drop_na() %>%                                           # Remover missings
   mutate(
-    log_PEM = log(relMean_MEPpp_FDI),                     # Transformação log
+    log_PEM = log(MEPpp_FDI_µV),                     # Transformação log
     
     # Agrupamento dos contextos: previsível vs imprevisível
     Predictability = ifelse(context %in% c(1, 10),
@@ -128,11 +128,11 @@ df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data pr
 # Pré-processamento para modelo com bloco
 df_clean <- df %>%
   filter(type_block == "Pulse") %>%
-  select(volunteer, trial, block_info, relMean_MEPpp_FDI,
+  select(volunteer, trial, block_info, MEPpp_FDI_µV,
          context, last_random_was_error) %>%
   drop_na() %>%
   mutate(
-    log_PEM = log(relMean_MEPpp_FDI),
+    log_PEM = log(MEPpp_FDI_µV),
     
     # Previsibilidade
     Predictability = ifelse(context %in% c(1, 10),
