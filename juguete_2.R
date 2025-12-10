@@ -96,9 +96,12 @@ anova(modelo_misto, type = 3)
 
 
 
-#
-#
-#
+
+
+
+
+
+# segundo modelo: efeito do aprendizado
 # Modelo com Bloco para testar efeito do aprendizado na excitabilidade
 
 if(!require(emmeans)) install.packages("emmeans") # Recomendado para post-hoc de interações
@@ -106,7 +109,7 @@ if(!require(emmeans)) install.packages("emmeans") # Recomendado para post-hoc de
 
 library(emmeans)
 
-df <- read.csv("df_gkg-tms.csv")
+df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms.csv")
 
 # filtrado y transform adicionei block na seleção de colunas
 df_clean <- df %>%
@@ -133,12 +136,6 @@ df_clean <- df %>%
     
     volunteer = factor(volunteer)  )
 
-
-
-
-
-
-# segundo modelo: efeito do aprendizado
 # =====================================
 # para verificar se a modulação pelo contexto/erro muda ao longo do tempo.
 # hipótese: a diferença entre previsivel/imprevisivel deve aumentar nos blocos finais.
