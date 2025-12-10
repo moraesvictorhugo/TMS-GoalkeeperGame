@@ -8,7 +8,7 @@ library(ggplot2)
 
 # Import data
 file_path <- '~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18'
-file_name <- "df_gklab_analysis_20251118_2exclusions.csv"
+file_name <- "df_gkg-tms.csv"
 full_path <- file.path(file_path, file_name)
 
 # Creating DF
