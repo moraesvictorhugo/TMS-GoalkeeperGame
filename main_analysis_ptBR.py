@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 # STEP 0 - Importing Data and Setting Flags
 # ============================================
 # """
-## Importing processed csv file
+# Importing processed csv file
 file_path = '/home/victormoraes/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-08-27'
 file_name = "df_all_data_processed.csv"
 df = import_signal.import_csv_data(file_path, file_name)
@@ -33,7 +33,7 @@ lst_excluded_volunteers = []
 # [6, 10, 3, 4, 12, 13, 14, 15, 16]
 change_location_br = False
 remove_block = []                         # Remove undesired block for analysis
-export_df = True
+export_df = False
 
 if change_location_br:
     # Set locale to use comma as decimal separator (e.g., Brazilian locale)

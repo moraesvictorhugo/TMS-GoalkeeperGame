@@ -8,11 +8,12 @@
 
 # Auto-install missing packages
 if (!require(tidyverse))   install.packages("tidyverse")
-if (!require(lme4))        install.packages("lme4")       
+if (!require(lme4))        install.packages("lme4")
 if (!require(lmerTest))    install.packages("lmerTest")
 if (!require(performance)) install.packages("performance")
 if (!require(see))         install.packages("see")
 if (!require(emmeans))     install.packages("emmeans")     # Post-hoc tests
+if (!require(ggplot2))     install.packages("ggplot2")
 
 # Load required libraries
 library(tidyverse)
@@ -21,6 +22,7 @@ library(lmerTest)
 library(performance)
 library(see)
 library(emmeans)
+library(ggplot2)
 
 ###############################################################
 # 2. DATA IMPORT AND PREPROCESSING
@@ -37,21 +39,21 @@ df_FDI <- df %>%
   drop_na() %>%                                                       # Remove rows with missing values
   mutate(
     log_MEP_FDI = log(MEPpp_FDI_µV),                                  # Log-transform MEP amplitude (log-normal dist.)
-    
+
     # Predictability factor (Unpredictable = context 1,10)
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
     Predictability = factor(Predictability,                            # Convert to ordered factor
                             levels = c("Predictable", "Unpredictable")), # Predictable as reference
-    
+
     # Previous trial error (0=Correct, 1=Error)
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
                         labels = c("Correct", "Error")),              # Correct as reference
-    
+
     # Block factor (learning progression: Block 2→4→6)
     Block_Factor = factor(block_info, levels = c(2, 4, 6)),           # Block 2 as reference
-    
+
     # Ensure volunteer is factor for random effects
     volunteer = factor(volunteer)
   )
@@ -129,9 +131,22 @@ emmip(modelo_2_FDI, Block_Factor ~ Error_Prev | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDI)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-emmip(modelo_2_FDI, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
+# --------------------------------- MODIFIED - adding customization
+p <- emmip(modelo_2_FDI, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
       labs = list(y = "Log(MEP FDI)", x = "Previous Error",
                   title = "Triple Interaction: Predictability × Error × Block"))
+
+
+# Modifica os labels dos eixos (sobrescreve os automáticos)
+p <- p +
+  labs(x = "Random transition result",          # x label
+       y = "Log(FDI MEP Amplitude)",  # y label
+       title = "Triple interaction: Predictability × Error × Block") +
+  theme(axis.title = element_text(size = 12))  # Font size
+
+# Salva com alta resolução
+ggsave("modelo_2_FDI.png", plot = p, width = 10, height = 6, dpi = 300)
+# ---------------------------------  MODIFIED
 
 emmip(modelo_2_FDI, Error_Prev ~ Block_Factor | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDI)", x = "Block",
@@ -150,21 +165,21 @@ df_FDS <- df %>%
   drop_na() %>%                                                       # Remove rows with missing values
   mutate(
     log_MEP_FDS = log(MEPpp_FDS_µV),                                  # Log-transform MEP amplitude (log-normal dist.)
-    
+
     # Predictability factor (Unpredictable = context 1,10)
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
     Predictability = factor(Predictability,                            # Convert to ordered factor
                             levels = c("Predictable", "Unpredictable")), # Predictable as reference
-    
+
     # Previous trial error (0=Correct, 1=Error)
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
                         labels = c("Correct", "Error")),              # Correct as reference
-    
+
     # Block factor (learning progression: Block 2→4→6)
     Block_Factor = factor(block_info, levels = c(2, 4, 6)),           # Block 2 as reference
-    
+
     # Ensure volunteer is factor for random effects
     volunteer = factor(volunteer)
   )
@@ -242,9 +257,22 @@ emmip(modelo_2_FDS, Block_Factor ~ Error_Prev | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDS)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-emmip(modelo_2_FDS, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
-      labs = list(y = "Log(MEP FDS)", x = "Previous Error",
-                  title = "Triple Interaction: Predictability × Error × Block"))
+# --------------------------------- MODIFIED - adding customization
+p <- emmip(modelo_2_FDS, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
+           labs = list(y = "Log(MEP FDI)", x = "Previous Error",
+                       title = "Triple Interaction: Predictability × Error × Block"))
+
+
+# Modifica os labels dos eixos (sobrescreve os automáticos)
+p <- p +
+  labs(x = "Random transition result",          # x label
+       y = "Log(FDS MEP Amplitude)",  # y label
+       title = " ") +
+  theme(axis.title = element_text(size = 12))  # Font size
+
+# Salva com alta resolução
+ggsave("modelo_2_FDS.png", plot = p, width = 10, height = 6, dpi = 300)
+# ---------------------------------  MODIFIED
 
 emmip(modelo_2_FDS, Error_Prev ~ Block_Factor | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDS)", x = "Block",
@@ -263,21 +291,21 @@ df_RT <- df %>%
   drop_na() %>%                                                       # Remove rows with missing values
   mutate(
     log_RT = log(response_time),                                      # Log-transform RT
-    
+
     # Predictability factor (Unpredictable = context 1,10)
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
     Predictability = factor(Predictability,                            # Convert to ordered factor
                             levels = c("Predictable", "Unpredictable")), # Predictable as reference
-    
+
     # Previous trial error (0=Correct, 1=Error)
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
                         labels = c("Correct", "Error")),              # Correct as reference
-    
+
     # Block factor (learning progression: Block 2→4→6)
     Block_Factor = factor(block_info, levels = c(2, 4, 6)),           # Block 2 as reference
-    
+
     # Ensure volunteer is factor for random effects
     volunteer = factor(volunteer)
   )
@@ -355,9 +383,22 @@ emmip(modelo_2_RT, Block_Factor ~ Error_Prev | Predictability, CIs = FALSE,
       labs = list(y = "Log(RT)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-emmip(modelo_2_RT, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
-      labs = list(y = "Log(RT)", x = "Previous Error",
-                  title = "Triple Interaction: Predictability × Error × Block"))
+# --------------------------------- MODIFIED - adding customization
+p <- emmip(modelo_2_RT, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
+           labs = list(y = "Log(Response Time)", x = "Previous Error",
+                       title = " "))
+
+
+# Modifica os labels dos eixos (sobrescreve os automáticos)
+p <- p +
+  labs(x = "Random transition result",          # x label
+       y = "Log(Response Time)",  # y label
+       title = " ") +
+  theme(axis.title = element_text(size = 12))  # Font size
+
+# Salva com alta resolução
+ggsave("modelo_2_RT.png", plot = p, width = 10, height = 6, dpi = 300)
+# ---------------------------------  MODIFIED
 
 emmip(modelo_2_RT, Error_Prev ~ Block_Factor | Predictability, CIs = FALSE,
       labs = list(y = "Log(RT)", x = "Block",
