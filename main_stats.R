@@ -117,6 +117,13 @@ print(summary(modelo_2_FDI))
 cat("\n=== TYPE III ANOVA (Fixed Effects) ===\n")
 print(anova(modelo_2_FDI, type = 3))
 
+# Estimativa de médias no bloco 6
+emmeans(modelo_2_FDI,
+        ~ Predictability * Error_Prev,
+        at = list(Block_Factor = "6")) |> 
+  summary() |> 
+  transform(MEP_uV = exp(emmean))
+
 ###############################################################
 # 7. MODEL 2 DIAGNOSTICS
 ###############################################################

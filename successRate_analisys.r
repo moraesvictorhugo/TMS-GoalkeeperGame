@@ -72,10 +72,10 @@ p_sig <- ggplot(data_long, aes(Block, SuccessRate)) +
   theme_pubr() +
   labs(y = "Success Rate", x = "Block")
 
-ggsave(
-  "sucessRate_plot_significance.png",
-  plot = p_sig,
-  width = 10,
-  height = 6,
-  dpi = 300
-)
+# ggsave(
+#   "sucessRate_plot_significance.png",
+#   plot = p_sig,
+#   width = 10,
+#   height = 6,
+#   dpi = 300
+# )
