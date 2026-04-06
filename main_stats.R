@@ -292,30 +292,28 @@ emmip(modelo_2_FDS, Error_Prev ~ Block_Factor | Predictability, CIs = FALSE,
 
 # Create clean dataset for RT analysis (Pulse trials only)
 df_RT <- df %>%
-  filter(type_block == "Pulse") %>%                                    # Keep only Pulse TMS trials
-  select(volunteer, trial, block_info, response_time,                   # Select relevant columns
+  filter(type_block == "Pulse") %>%
+  select(volunteer, trial, block_info, response_time,
          context, last_random_was_error) %>%
-  drop_na() %>%                                                       # Remove rows with missing values
+  drop_na() %>%
   mutate(
-    log_RT = log(response_time),                                      # Log-transform RT
+    response_time = response_time * 1000,                             # Convert seconds to milliseconds
+    log_RT = log(response_time),                                      # Log-transform RT (now in ms)
 
-    # Predictability factor (Unpredictable = context 1,10)
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
-    Predictability = factor(Predictability,                            # Convert to ordered factor
-                            levels = c("Predictable", "Unpredictable")), # Predictable as reference
+    Predictability = factor(Predictability,
+                            levels = c("Predictable", "Unpredictable")),
 
-    # Previous trial error (0=Correct, 1=Error)
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
-                        labels = c("Correct", "Error")),              # Correct as reference
+                        labels = c("Correct", "Error")),
 
-    # Block factor (learning progression: Block 2→4→6)
-    Block_Factor = factor(block_info, levels = c(2, 4, 6)),           # Block 2 as reference
+    Block_Factor = factor(block_info, levels = c(2, 4, 6)),
 
-    # Ensure volunteer is factor for random effects
     volunteer = factor(volunteer)
   )
+
 
 # Check condition distribution (balance check)
 table(df_RT$Predictability, df_RT$Error_Prev)
