@@ -1,5 +1,5 @@
 ###############################################################
-# LINEAR MIXED EFFECTS MODELS - PEMS FDI ANALYSIS
+# LINEAR MIXED EFFECTS MODELS - PEMS FDI / FDS / RT ANALYSIS
 ###############################################################
 
 ###############################
@@ -12,7 +12,7 @@ if (!require(lme4))        install.packages("lme4")
 if (!require(lmerTest))    install.packages("lmerTest")
 if (!require(performance)) install.packages("performance")
 if (!require(see))         install.packages("see")
-if (!require(emmeans))     install.packages("emmeans")     # Post-hoc tests
+if (!require(emmeans))     install.packages("emmeans")
 if (!require(ggplot2))     install.packages("ggplot2")
 
 # Load required libraries
@@ -25,71 +25,64 @@ library(emmeans)
 library(ggplot2)
 
 ###############################################################
-# 2. DATA IMPORT AND PREPROCESSING
+# 2. DATA IMPORT
 ###############################################################
 
-# Import dataset
 df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
 
-# Create clean dataset for FDI analysis (Pulse trials only)
-df_FDI <- df %>%
-  filter(type_block == "Pulse") %>%                                    # Keep only Pulse TMS trials
-  select(volunteer, trial, block_info, MEPpp_FDI_µV,                   # Select relevant columns
-         context, last_random_was_error) %>%
-  drop_na() %>%                                                       # Remove rows with missing values
-  mutate(
-    log_MEP_FDI = log(MEPpp_FDI_µV),                                  # Log-transform MEP amplitude (log-normal dist.)
+###############################################################
+#
+#                         FDI ANALYSIS
+#
+###############################################################
 
-    # Predictability factor (Unpredictable = context 1,10)
+###############################################################
+# 3. FDI - PREPROCESSING
+###############################################################
+
+df_FDI <- df %>%
+  filter(type_block == "Pulse") %>%
+  select(volunteer, trial, block_info, MEPpp_FDI_µV,
+         context, last_random_was_error) %>%
+  drop_na() %>%
+  mutate(
+    log_MEP_FDI = log(MEPpp_FDI_µV),
+    
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
-    Predictability = factor(Predictability,                            # Convert to ordered factor
-                            levels = c("Predictable", "Unpredictable")), # Predictable as reference
-
-    # Previous trial error (0=Correct, 1=Error)
+    Predictability = factor(Predictability,
+                            levels = c("Predictable", "Unpredictable")),
+    
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
-                        labels = c("Correct", "Error")),              # Correct as reference
-
-    # Block factor (learning progression: Block 2→4→6)
-    Block_Factor = factor(block_info, levels = c(2, 4, 6)),           # Block 2 as reference
-
-    # Ensure volunteer is factor for random effects
+                        labels = c("Correct", "Error")),
+    
+    Block_Factor = factor(block_info, levels = c(2, 4, 6)),
+    
     volunteer = factor(volunteer)
   )
 
-# Check condition distribution (balance check)
 table(df_FDI$Predictability, df_FDI$Error_Prev)
 
 ###############################################################
-# 3. MODEL 1 - Predictability × Previous Error (Main effects + interaction)
+# 4. FDI - MODEL 1: Predictability × Previous Error
 ###############################################################
 
-cat("\n=== FITTING MODEL 1: Predictability × Previous Error ===\n")
+cat("\n=== FITTING MODEL 1 FDI: Predictability × Previous Error ===\n")
 
-# Mixed model with random intercept per volunteer
 modelo_1_FDI <- lmer(
-  log_MEP_FDI ~ Predictability * Error_Prev + (1 | volunteer),       # Fixed: interaction + Random: volunteer intercept
+  log_MEP_FDI ~ Predictability * Error_Prev + (1 | volunteer),
   data = df_FDI,
-  REML = TRUE                                                        # Restricted Maximum Likelihood
+  REML = TRUE
 )
 
-# Model summary (coefficients, p-values)
 summary(modelo_1_FDI)
-
-# Type III ANOVA (sequential F-tests for fixed effects)
 anova(modelo_1_FDI, type = 3)
 
-###############################################################
-# 4. MODEL DIAGNOSTICS (Automated)
-###############################################################
-check_model(modelo_1_FDI)                                               # Residuals, QQ, homogeneity checks
+# Diagnostics
+check_model(modelo_1_FDI)
 
-###############################################################
-# 5. INTERACTION PLOTS - Estimated Marginal Means
-###############################################################
-
-# Predictability × Error interaction
+# Interaction plots
 emmip(modelo_1_FDI, Error_Prev ~ Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDI)", x = "Predictability",
                   title = "Interaction: Predictability × Error"))
@@ -99,130 +92,111 @@ emmip(modelo_1_FDI, Predictability ~ Error_Prev, CIs = FALSE,
                   title = "Interaction: Predictability × Error"))
 
 ###############################################################
-# 6. MODEL 2 - Triple Interaction (Predictability × Error × Block/Learning)
+# 5. FDI - MODEL 2: Predictability × Error × Block
 ###############################################################
 
-cat("\n=== FITTING MODEL 2: Predictability × Error × Block ===\n")
+cat("\n=== FITTING MODEL 2 FDI: Predictability × Error × Block ===\n")
 
-# Full model with triple interaction + learning effect across blocks
 modelo_2_FDI <- lmer(
   log_MEP_FDI ~ Predictability * Error_Prev * Block_Factor + (1 | volunteer),
   data = df_FDI,
   REML = TRUE
 )
 
-# Model results
 print(summary(modelo_2_FDI))
 
 cat("\n=== TYPE III ANOVA (Fixed Effects) ===\n")
 print(anova(modelo_2_FDI, type = 3))
 
-# Estimativa de médias no bloco 6
+# Estimated means at Block 6
 emmeans(modelo_2_FDI,
         ~ Predictability * Error_Prev,
-        at = list(Block_Factor = "6")) |> 
-  summary() |> 
+        at = list(Block_Factor = "6")) |>
+  summary() |>
   transform(MEP_uV = exp(emmean))
 
-###############################################################
-# 7. MODEL 2 DIAGNOSTICS
-###############################################################
+# Diagnostics
 check_model(modelo_2_FDI)
 
 ###############################################################
-# 8. TRIPLE INTERACTION VISUALIZATION
+# 6. FDI - TRIPLE INTERACTION VISUALIZATION
 ###############################################################
 
-# Three-way interaction plots (condition by condition)
 emmip(modelo_2_FDI, Block_Factor ~ Error_Prev | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDI)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-# --------------------------------- MODIFIED - adding customization
-p <- emmip(modelo_2_FDI, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
-      labs = list(y = "Log(MEP FDI)", x = "Previous Error",
-                  title = "Triple Interaction: Predictability × Error × Block"))
+# Custom plot — Predictability × Error | Block
+p_FDI <- emmip(modelo_2_FDI, Predictability ~ Error_Prev | Block_Factor,
+               CIs = FALSE, plotit = TRUE)
 
+p_FDI <- p_FDI +
+  scale_color_manual(values = c("Predictable" = "grey60", "Unpredictable" = "black")) +
+  facet_wrap(~ Block_Factor, labeller = labeller(Block_Factor = function(x) paste("Block:", x))) +
+  labs(x = "Random transition result",
+       y = "EMM of Log MEP Amplitude in FDI") +
+  theme(axis.title = element_text(size = 12))
 
-# Modifica os labels dos eixos (sobrescreve os automáticos)
-p <- p +
-  labs(x = "Random transition result",          # x label
-       y = "Log(FDI MEP Amplitude)",  # y label
-       title = "Triple interaction: Predictability × Error × Block") +
-  theme(axis.title = element_text(size = 12))  # Font size
-
-# Salva com alta resolução
-ggsave("modelo_2_FDI.png", plot = p, width = 10, height = 6, dpi = 300)
-# ---------------------------------  MODIFIED
+print(p_FDI)
+ggsave("modelo_2_FDI.png", plot = p_FDI, width = 10, height = 6, dpi = 300)
 
 emmip(modelo_2_FDI, Error_Prev ~ Block_Factor | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDI)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-# ------------------------------------------------------------------------------
 ###############################################################
-# 9. DATA IMPORT AND PREPROCESSING
+#
+#                         FDS ANALYSIS
+#
 ###############################################################
 
-# Create clean dataset for FDI analysis (Pulse trials only)
+###############################################################
+# 7. FDS - PREPROCESSING
+###############################################################
+
 df_FDS <- df %>%
-  filter(type_block == "Pulse") %>%                                    # Keep only Pulse TMS trials
-  select(volunteer, trial, block_info, MEPpp_FDS_µV,                   # Select relevant columns
+  filter(type_block == "Pulse") %>%
+  select(volunteer, trial, block_info, MEPpp_FDS_µV,
          context, last_random_was_error) %>%
-  drop_na() %>%                                                       # Remove rows with missing values
+  drop_na() %>%
   mutate(
-    log_MEP_FDS = log(MEPpp_FDS_µV),                                  # Log-transform MEP amplitude (log-normal dist.)
-
-    # Predictability factor (Unpredictable = context 1,10)
+    log_MEP_FDS = log(MEPpp_FDS_µV),
+    
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
-    Predictability = factor(Predictability,                            # Convert to ordered factor
-                            levels = c("Predictable", "Unpredictable")), # Predictable as reference
-
-    # Previous trial error (0=Correct, 1=Error)
+    Predictability = factor(Predictability,
+                            levels = c("Predictable", "Unpredictable")),
+    
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
-                        labels = c("Correct", "Error")),              # Correct as reference
-
-    # Block factor (learning progression: Block 2→4→6)
-    Block_Factor = factor(block_info, levels = c(2, 4, 6)),           # Block 2 as reference
-
-    # Ensure volunteer is factor for random effects
+                        labels = c("Correct", "Error")),
+    
+    Block_Factor = factor(block_info, levels = c(2, 4, 6)),
+    
     volunteer = factor(volunteer)
   )
 
-# Check condition distribution (balance check)
 table(df_FDS$Predictability, df_FDS$Error_Prev)
 
 ###############################################################
-# 10. MODEL 1 - Predictability × Previous Error (Main effects + interaction)
+# 8. FDS - MODEL 1: Predictability × Previous Error
 ###############################################################
 
-cat("\n=== FITTING MODEL 1: Predictability × Previous Error ===\n")
+cat("\n=== FITTING MODEL 1 FDS: Predictability × Previous Error ===\n")
 
-# Mixed model with random intercept per volunteer
 modelo_1_FDS <- lmer(
-  log_MEP_FDS ~ Predictability * Error_Prev + (1 | volunteer),       # Fixed: interaction + Random: volunteer intercept
+  log_MEP_FDS ~ Predictability * Error_Prev + (1 | volunteer),
   data = df_FDS,
-  REML = TRUE                                                        # Restricted Maximum Likelihood
+  REML = TRUE
 )
 
-# Model summary (coefficients, p-values)
 summary(modelo_1_FDS)
-
-# Type III ANOVA (sequential F-tests for fixed effects)
 anova(modelo_1_FDS, type = 3)
 
-###############################################################
-# 11. MODEL DIAGNOSTICS (Automated)
-###############################################################
-check_model(modelo_1_FDS)                                               # Residuals, QQ, homogeneity checks
+# Diagnostics
+check_model(modelo_1_FDS)
 
-###############################################################
-# 12. INTERACTION PLOTS - Estimated Marginal Means
-###############################################################
-
-# Predictability × Error interaction
+# Interaction plots
 emmip(modelo_1_FDS, Error_Prev ~ Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDS)", x = "Predictability",
                   title = "Interaction: Predictability × Error"))
@@ -232,121 +206,105 @@ emmip(modelo_1_FDS, Predictability ~ Error_Prev, CIs = FALSE,
                   title = "Interaction: Predictability × Error"))
 
 ###############################################################
-# 13. MODEL 2 - Triple Interaction (Predictability × Error × Block/Learning)
+# 9. FDS - MODEL 2: Predictability × Error × Block
 ###############################################################
 
-cat("\n=== FITTING MODEL 2: Predictability × Error × Block ===\n")
+cat("\n=== FITTING MODEL 2 FDS: Predictability × Error × Block ===\n")
 
-# Full model with triple interaction + learning effect across blocks
 modelo_2_FDS <- lmer(
   log_MEP_FDS ~ Predictability * Error_Prev * Block_Factor + (1 | volunteer),
   data = df_FDS,
   REML = TRUE
 )
 
-# Model results
 print(summary(modelo_2_FDS))
 
 cat("\n=== TYPE III ANOVA (Fixed Effects) ===\n")
 print(anova(modelo_2_FDS, type = 3))
 
-###############################################################
-# 14. MODEL 2 DIAGNOSTICS
-###############################################################
+# Diagnostics
 check_model(modelo_2_FDS)
 
 ###############################################################
-# 15. TRIPLE INTERACTION VISUALIZATION
+# 10. FDS - TRIPLE INTERACTION VISUALIZATION
 ###############################################################
 
-# Three-way interaction plots (condition by condition)
 emmip(modelo_2_FDS, Block_Factor ~ Error_Prev | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDS)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-# --------------------------------- MODIFIED - adding customization
-p <- emmip(modelo_2_FDS, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
-           labs = list(y = "Log(MEP FDI)", x = "Previous Error",
-                       title = "Triple Interaction: Predictability × Error × Block"))
+# Custom plot — Predictability × Error | Block
+p_FDS <- emmip(modelo_2_FDS, Predictability ~ Error_Prev | Block_Factor,
+               CIs = FALSE, plotit = TRUE)
 
+p_FDS <- p_FDS +
+  scale_color_manual(values = c("Predictable" = "grey60", "Unpredictable" = "black")) +
+  facet_wrap(~ Block_Factor, labeller = labeller(Block_Factor = function(x) paste("Block:", x))) +
+  labs(x = "Random transition result",
+       y = "EMM of Log MEP Amplitude in FDS") +
+  theme(axis.title = element_text(size = 12))
 
-# Modifica os labels dos eixos (sobrescreve os automáticos)
-p <- p +
-  labs(x = "Random transition result",          # x label
-       y = "Log(FDS MEP Amplitude)",  # y label
-       title = " ") +
-  theme(axis.title = element_text(size = 12))  # Font size
-
-# Salva com alta resolução
-ggsave("modelo_2_FDS.png", plot = p, width = 10, height = 6, dpi = 300)
-# ---------------------------------  MODIFIED
+print(p_FDS)
+ggsave("modelo_2_FDS.png", plot = p_FDS, width = 10, height = 6, dpi = 300)
 
 emmip(modelo_2_FDS, Error_Prev ~ Block_Factor | Predictability, CIs = FALSE,
       labs = list(y = "Log(MEP FDS)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-# ------------------------------------------------------------------------------
 ###############################################################
-# 16. DATA IMPORT AND PREPROCESSING
+#
+#                         RT ANALYSIS
+#
 ###############################################################
 
-# Create clean dataset for RT analysis (Pulse trials only)
+###############################################################
+# 11. RT - PREPROCESSING
+###############################################################
+
 df_RT <- df %>%
   filter(type_block == "Pulse") %>%
   select(volunteer, trial, block_info, response_time,
          context, last_random_was_error) %>%
   drop_na() %>%
   mutate(
-    response_time = response_time * 1000,                             # Convert seconds to milliseconds
-    log_RT = log(response_time),                                      # Log-transform RT (now in ms)
-
+    response_time = response_time * 1000,
+    log_RT = log(response_time),
+    
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
     Predictability = factor(Predictability,
                             levels = c("Predictable", "Unpredictable")),
-
+    
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
                         labels = c("Correct", "Error")),
-
+    
     Block_Factor = factor(block_info, levels = c(2, 4, 6)),
-
+    
     volunteer = factor(volunteer)
   )
 
-
-# Check condition distribution (balance check)
 table(df_RT$Predictability, df_RT$Error_Prev)
 
 ###############################################################
-# 17. MODEL 1 - Predictability × Previous Error (Main effects + interaction)
+# 12. RT - MODEL 1: Predictability × Previous Error
 ###############################################################
 
-cat("\n=== FITTING MODEL 1: Predictability × Previous Error ===\n")
+cat("\n=== FITTING MODEL 1 RT: Predictability × Previous Error ===\n")
 
-# Mixed model with random intercept per volunteer
 modelo_1_RT <- lmer(
-  log_RT ~ Predictability * Error_Prev + (1 | volunteer),       # Fixed: interaction + Random: volunteer intercept
+  log_RT ~ Predictability * Error_Prev + (1 | volunteer),
   data = df_RT,
-  REML = TRUE                                                        # Restricted Maximum Likelihood
+  REML = TRUE
 )
 
-# Model summary (coefficients, p-values)
 summary(modelo_1_RT)
-
-# Type III ANOVA (sequential F-tests for fixed effects)
 anova(modelo_1_RT, type = 3)
 
-###############################################################
-# 18. MODEL DIAGNOSTICS (Automated)
-###############################################################
-check_model(modelo_1_RT)                                               # Residuals, QQ, homogeneity checks
+# Diagnostics
+check_model(modelo_1_RT)
 
-###############################################################
-# 19. INTERACTION PLOTS - Estimated Marginal Means
-###############################################################
-
-# Predictability × Error interaction
+# Interaction plots
 emmip(modelo_1_RT, Error_Prev ~ Predictability, CIs = FALSE,
       labs = list(y = "Log(RT)", x = "Predictability",
                   title = "Interaction: Predictability × Error"))
@@ -356,54 +314,46 @@ emmip(modelo_1_RT, Predictability ~ Error_Prev, CIs = FALSE,
                   title = "Interaction: Predictability × Error"))
 
 ###############################################################
-# 20. MODEL 2 - Triple Interaction (Predictability × Error × Block/Learning)
+# 13. RT - MODEL 2: Predictability × Error × Block
 ###############################################################
 
-cat("\n=== FITTING MODEL 2: Predictability × Error × Block ===\n")
+cat("\n=== FITTING MODEL 2 RT: Predictability × Error × Block ===\n")
 
-# Full model with triple interaction + learning effect across blocks
 modelo_2_RT <- lmer(
   log_RT ~ Predictability * Error_Prev * Block_Factor + (1 | volunteer),
   data = df_RT,
   REML = TRUE
 )
 
-# Model results
 print(summary(modelo_2_RT))
 
 cat("\n=== TYPE III ANOVA (Fixed Effects) ===\n")
 print(anova(modelo_2_RT, type = 3))
 
-###############################################################
-# 21. MODEL 2 DIAGNOSTICS
-###############################################################
+# Diagnostics
 check_model(modelo_2_RT)
 
 ###############################################################
-# 22. TRIPLE INTERACTION VISUALIZATION
+# 14. RT - TRIPLE INTERACTION VISUALIZATION
 ###############################################################
 
-# Three-way interaction plots (condition by condition)
 emmip(modelo_2_RT, Block_Factor ~ Error_Prev | Predictability, CIs = FALSE,
       labs = list(y = "Log(RT)", x = "Block",
                   title = "Triple Interaction: Predictability × Error × Block"))
 
-# --------------------------------- MODIFIED - adding customization
-p <- emmip(modelo_2_RT, Predictability ~ Error_Prev | Block_Factor, CIs = FALSE,
-           labs = list(y = "Log(Response Time)", x = "Previous Error",
-                       title = " "))
+# Custom plot — Predictability × Error | Block
+p_RT <- emmip(modelo_2_RT, Predictability ~ Error_Prev | Block_Factor,
+              CIs = FALSE, plotit = TRUE)
 
+p_RT <- p_RT +
+  scale_color_manual(values = c("Predictable" = "grey60", "Unpredictable" = "black")) +
+  facet_wrap(~ Block_Factor, labeller = labeller(Block_Factor = function(x) paste("Block:", x))) +
+  labs(x = "Random transition result",
+       y = "EMM of Log Response Time") +
+  theme(axis.title = element_text(size = 12))
 
-# Modifica os labels dos eixos (sobrescreve os automáticos)
-p <- p +
-  labs(x = "Random transition result",          # x label
-       y = "Log(Response Time)",  # y label
-       title = " ") +
-  theme(axis.title = element_text(size = 12))  # Font size
-
-# Salva com alta resolução
-ggsave("modelo_2_RT.png", plot = p, width = 10, height = 6, dpi = 300)
-# ---------------------------------  MODIFIED
+print(p_RT)
+ggsave("modelo_2_RT.png", plot = p_RT, width = 10, height = 6, dpi = 300)
 
 emmip(modelo_2_RT, Error_Prev ~ Block_Factor | Predictability, CIs = FALSE,
       labs = list(y = "Log(RT)", x = "Block",
