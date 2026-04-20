@@ -47,18 +47,18 @@ df_FDI <- df %>%
   drop_na() %>%
   mutate(
     log_MEP_FDI = log(MEPpp_FDI_µV),
-    
+
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
     Predictability = factor(Predictability,
                             levels = c("Predictable", "Unpredictable")),
-    
+
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
                         labels = c("Correct", "Error")),
-    
+
     Block_Factor = factor(block_info, levels = c(2, 4, 6)),
-    
+
     volunteer = factor(volunteer)
   )
 
@@ -108,12 +108,29 @@ print(summary(modelo_2_FDI))
 cat("\n=== TYPE III ANOVA (Fixed Effects) ===\n")
 print(anova(modelo_2_FDI, type = 3))
 
-# Estimated means at Block 6
-emmeans(modelo_2_FDI,
-        ~ Predictability * Error_Prev,
-        at = list(Block_Factor = "6")) |>
-  summary() |>
-  transform(MEP_uV = exp(emmean))
+# # Estimated means at Block 6
+# test <- emmeans(modelo_2_FDI,
+#         ~ Predictability * Error_Prev,
+#         at = list(Block_Factor = "6")) |>
+#   summary() |>
+#   transform(MEP_uV = exp(emmean))
+# 
+# pairs(test, adjust = "tukey")
+
+# ---
+
+# 1) Objeto emmGrid (NÃO use summary/transform aqui!)
+emm <- emmeans(modelo_2_FDI,
+               ~ Predictability * Error_Prev,
+               at = list(Block_Factor = "6"))
+
+# 2) Contrastes par-a-par (na escala do modelo, log)
+pairs(emm, adjust = "tukey")
+
+# 3) Contrastes na escala original (µV) — se seu modelo é log(MEP)
+pairs(regrid(emm), adjust = "tukey")
+
+# ---
 
 # Diagnostics
 check_model(modelo_2_FDI)

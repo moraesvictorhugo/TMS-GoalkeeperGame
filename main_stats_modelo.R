@@ -8,7 +8,7 @@
 
 # Auto-install missing packages
 if (!require(tidyverse))   install.packages("tidyverse")
-if (!require(lme4))        install.packages("lme4")       
+if (!require(lme4))        install.packages("lme4")
 if (!require(lmerTest))    install.packages("lmerTest")
 if (!require(performance)) install.packages("performance")
 if (!require(see))         install.packages("see")
@@ -37,21 +37,21 @@ df_FDI <- df %>%
   drop_na() %>%                                                       # Remove rows with missing values
   mutate(
     log_MEP_FDI = log(MEPpp_FDI_µV),                                  # Log-transform MEP amplitude (log-normal dist.)
-    
+
     # Predictability factor (Unpredictable = context 1,10)
     Predictability = ifelse(context %in% c(1, 10),
                             "Unpredictable", "Predictable"),
     Predictability = factor(Predictability,                            # Convert to ordered factor
                             levels = c("Predictable", "Unpredictable")), # Predictable as reference
-    
+
     # Previous trial error (0=Correct, 1=Error)
     Error_Prev = factor(last_random_was_error,
                         levels = c(0, 1),
                         labels = c("Correct", "Error")),              # Correct as reference
-    
+
     # Block factor (learning progression: Block 2→4→6)
     Block_Factor = factor(block_info, levels = c(2, 4, 6)),           # Block 2 as reference
-    
+
     # Ensure volunteer is factor for random effects
     volunteer = factor(volunteer)
   )
@@ -111,6 +111,9 @@ modelo_2_FDI <- lmer(
 
 # Model results
 print(summary(modelo_2_FDI))
+
+# Get CI of 95%
+confint(modelo_2_FDI, method = "Wald")  # ICs de 95% por padrão
 
 cat("\n=== TYPE III ANOVA (Fixed Effects) ===\n")
 print(anova(modelo_2_FDI, type = 3))
