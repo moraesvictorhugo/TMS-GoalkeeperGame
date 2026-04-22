@@ -149,7 +149,7 @@ p_FDI <- p_FDI +
     strip.text        = element_text(size = 16),
     legend.title      = element_text(size = 13),
     legend.text       = element_text(size = 12),
-    legend.position   = c(0.11, 0.98),
+    legend.position   = c(0.08, 0.98),
     legend.background = element_rect(fill = "white", color = "black"),
     legend.key        = element_rect(fill = "white")
   )
@@ -271,7 +271,7 @@ p_FDS <- p_FDS +
     strip.text        = element_text(size = 16),
     legend.title      = element_text(size = 13),
     legend.text       = element_text(size = 12),
-    legend.position   = c(0.11, 0.98),
+    legend.position   = c(0.08, 0.98),
     legend.background = element_rect(fill = "white", color = "black"),
     legend.key        = element_rect(fill = "white")
   )
@@ -394,7 +394,7 @@ p_RT <- p_RT +
     strip.text        = element_text(size = 16),
     legend.title      = element_text(size = 13),
     legend.text       = element_text(size = 12),
-    legend.position   = c(0.11, 0.98),
+    legend.position   = c(0.92, 0.98),
     legend.background = element_rect(fill = "white", color = "black"),
     legend.key        = element_rect(fill = "white")
   )
