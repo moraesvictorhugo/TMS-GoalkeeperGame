@@ -12,3 +12,6 @@ __pycache__/
 # R files
 .RData
 .Rhistory
+
+# CSV files
+*.csv
