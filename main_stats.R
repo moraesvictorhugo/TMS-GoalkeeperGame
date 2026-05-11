@@ -112,7 +112,9 @@ print(effectsize::eta_squared(anova(modelo_2_FDI, type = 3),
 
 # Estimated marginal means for the full 3-way structure
 emm_FDI <- emmeans(modelo_2_FDI,
-                   ~ Predictability * Error_Prev | Block_Factor)
+                   ~ Predictability * Error_Prev | Block_Factor,
+                   tran = "log",
+                   type = "response")
 
 cat("\n=== EMMs - FDI (per Block) ===\n")
 print(emm_FDI)
@@ -121,20 +123,33 @@ print(emm_FDI)
 cat("\n=== PAIRWISE CONTRASTS - FDI ===\n")
 print(pairs(emm_FDI, adjust = "BH"))
 
-# Simple effect: Predictability within each Error_Prev × Block combination
+# --- SIMPLE EFFECTS ---
+
+# Simple effect de Predictability (6 contrastes)
 cat("\n=== SIMPLE EFFECT OF PREDICTABILITY - FDI ===\n")
 print(emmeans(modelo_2_FDI,
               pairwise ~ Predictability | Error_Prev * Block_Factor,
-              adjust = "bonferroni"))
+              tran = "log",
+              type = "response",
+              adjust = "BH"))
 
+# Simple effect de Error_Prev (6 contrastes)
+cat("\n=== SIMPLE EFFECT OF PREVIOUS-ERROR - FDI ===\n")
+print(emmeans(modelo_2_FDI,
+              pairwise ~ Error_Prev | Predictability * Block_Factor,
+              tran = "log",
+              type = "response",
+              adjust = "BH"))
 
 ###############################################################
 # 7. FDI - TRIPLE INTERACTION VISUALIZATION
 ###############################################################
-
-# Custom plot — Predictability × Error | Block
-p_FDI <- emmip(modelo_2_FDI, Predictability ~ Error_Prev | Block_Factor,
-               CIs = FALSE, plotit = TRUE)
+p_FDI <- emmip(modelo_2_FDI,
+               Predictability ~ Error_Prev | Block_Factor,
+               CIs   = FALSE,
+               tran  = "log",         
+               type  = "response",
+               plotit = TRUE)
 
 p_FDI <- p_FDI +
   scale_color_manual(values = c("Predictable"   = "grey60",
@@ -142,7 +157,7 @@ p_FDI <- p_FDI +
   facet_wrap(~ Block_Factor,
              labeller = labeller(Block_Factor = function(x) paste("Block:", x))) +
   labs(x = "Random transition result",
-       y = "EMM of Log MEP Amplitude in FDI") +
+       y = "EMM of MEP amplitude in FDI (µV)") +
   theme(
     axis.title        = element_text(size = 18),
     axis.text         = element_text(size = 14),
@@ -218,45 +233,49 @@ check_model(modelo_2_FDS)
 # 10. FDS - EFFECT SIZES
 ###############################################################
 
-# R² marginal (fixed only) and conditional (fixed + random)
 cat("\n=== R² (marginal & conditional) - FDS ===\n")
 print(performance::r2(modelo_2_FDS))
 
-# Partial eta² for each fixed-effect term
 cat("\n=== PARTIAL ETA² - FDS ===\n")
 print(effectsize::eta_squared(anova(modelo_2_FDS, type = 3),
                               partial = TRUE, ci = 0.95))
 
 
 ###############################################################
-# 11. FDS - POST-HOC (EMMEANS)
+# 11. FDS - POST-HOC: MARGINAL MEANS (no interaction → main effects only)
 ###############################################################
 
-# Estimated marginal means for the full 3-way structure
-emm_FDS <- emmeans(modelo_2_FDS,
-                   ~ Predictability * Error_Prev | Block_Factor)
+# Marginal mean: PREDICTABILITY (averaged over Error_Prev and Block)
+cat("\n=== MARGINAL MEANS - PREDICTABILITY (FDS) ===\n")
+emm_pred_FDS <- emmeans(modelo_2_FDS, ~ Predictability,
+                        tran = "log", type = "response")
+print(emm_pred_FDS)
+print(pairs(emm_pred_FDS, adjust = "BH"))
 
-cat("\n=== EMMs - FDS (per Block) ===\n")
-print(emm_FDS)
+# Marginal mean: ERROR_PREV (averaged over Predictability and Block)
+cat("\n=== MARGINAL MEANS - PREVIOUS-ERROR (FDS) ===\n")
+emm_err_FDS <- emmeans(modelo_2_FDS, ~ Error_Prev,
+                       tran = "log", type = "response")
+print(emm_err_FDS)
+print(pairs(emm_err_FDS, adjust = "BH"))
 
-# Pairwise comparisons within each Block (Benjamini-Hochberg-adjusted)
-cat("\n=== PAIRWISE CONTRASTS - FDS ===\n")
-print(pairs(emm_FDS, adjust = "BH"))
-
-# Simple effect: Predictability within each Error_Prev × Block combination
-cat("\n=== SIMPLE EFFECT OF PREDICTABILITY - FDS ===\n")
-print(emmeans(modelo_2_FDS,
-              pairwise ~ Predictability | Error_Prev * Block_Factor,
-              adjust = "bonferroni"))
+# Marginal mean: BLOCK (averaged over Predictability and Error_Prev)
+cat("\n=== MARGINAL MEANS - BLOCK (FDS) ===\n")
+emm_block_FDS <- emmeans(modelo_2_FDS, ~ Block_Factor,
+                         tran = "log", type = "response")
+print(emm_block_FDS)
+print(pairs(emm_block_FDS, adjust = "BH")) # 3 contrastes
 
 
 ###############################################################
 # 12. FDS - TRIPLE INTERACTION VISUALIZATION
 ###############################################################
-
-# Custom plot — Predictability × Error | Block
-p_FDS <- emmip(modelo_2_FDS, Predictability ~ Error_Prev | Block_Factor,
-               CIs = FALSE, plotit = TRUE)
+p_FDS <- emmip(modelo_2_FDS,
+               Predictability ~ Error_Prev | Block_Factor,
+               CIs   = FALSE,
+               tran  = "log",
+               type  = "response",
+               plotit = TRUE)
 
 p_FDS <- p_FDS +
   scale_color_manual(values = c("Predictable"   = "grey60",
@@ -264,7 +283,7 @@ p_FDS <- p_FDS +
   facet_wrap(~ Block_Factor,
              labeller = labeller(Block_Factor = function(x) paste("Block:", x))) +
   labs(x = "Random transition result",
-       y = "EMM of Log MEP Amplitude in FDS") +
+       y = "EMM of MEP amplitude in FDS (µV)") +
   theme(
     axis.title        = element_text(size = 18),
     axis.text         = element_text(size = 14),
@@ -277,8 +296,7 @@ p_FDS <- p_FDS +
   )
 
 print(p_FDS)
-# ggsave("modelo_2_FDS.png", plot = p_FDS, width = 10, height = 6, dpi = 300)
-
+# ggsave("modelo_2_FDS.png", plot = p_FDS, width = 10, height = 6, dpi = 600)
 
 ###############################################################
 #                                                             #
@@ -341,45 +359,178 @@ check_model(modelo_2_RT)
 # 15. RT - EFFECT SIZES
 ###############################################################
 
-# R² marginal (fixed only) and conditional (fixed + random)
 cat("\n=== R² (marginal & conditional) - RT ===\n")
 print(performance::r2(modelo_2_RT))
 
-# Partial eta² for each fixed-effect term
 cat("\n=== PARTIAL ETA² - RT ===\n")
 print(effectsize::eta_squared(anova(modelo_2_RT, type = 3),
                               partial = TRUE, ci = 0.95))
 
 
 ###############################################################
-# 16. RT - POST-HOC (EMMEANS)
+# 16. RT - POST-HOC: 3-WAY STRUCTURE (kept for reference)
 ###############################################################
+# NOTE: Three-way interaction was non-significant (p = 0.792).
+# The blocks below are exploratory/illustrative only.
 
-# Estimated marginal means for the full 3-way structure
 emm_RT <- emmeans(modelo_2_RT,
-                  ~ Predictability * Error_Prev | Block_Factor)
+                  ~ Predictability * Error_Prev | Block_Factor,
+                  tran = "log",
+                  type = "response")
 
 cat("\n=== EMMs - RT (per Block) ===\n")
 print(emm_RT)
 
-# Pairwise comparisons within each Block (Benjamini-Hochberg-adjusted)
-cat("\n=== PAIRWISE CONTRASTS - RT ===\n")
+cat("\n=== PAIRWISE CONTRASTS - RT (per Block) ===\n")
 print(pairs(emm_RT, adjust = "BH"))
 
-# Simple effect: Predictability within each Error_Prev × Block combination
-cat("\n=== SIMPLE EFFECT OF PREDICTABILITY - RT ===\n")
+# --- SIMPLE EFFECTS (3-way) ---
+
+cat("\n=== SIMPLE EFFECT OF PREDICTABILITY (per Error × Block) - RT ===\n")
 print(emmeans(modelo_2_RT,
               pairwise ~ Predictability | Error_Prev * Block_Factor,
-              adjust = "bonferroni"))
+              tran = "log",
+              type = "response",
+              adjust = "BH"))
 
+cat("\n=== SIMPLE EFFECT OF PREVIOUS-ERROR (per Predictability × Block) - RT ===\n")
+print(emmeans(modelo_2_RT,
+              pairwise ~ Error_Prev | Predictability * Block_Factor,
+              tran = "log",
+              type = "response",
+              adjust = "BH"))
+
+
+###############################################################
+# 17. RT - POST-HOC: PRIMARY ANALYSIS (additions)
+###############################################################
+# The three-way interaction is non-significant (p = 0.792), but two
+# two-way interactions are significant. They are decomposed below,
+# independently, collapsing over the remaining factor.
+
+# -------------------------------------------------------------
+# 17a. MAIN EFFECT OF BLOCK
+# (Block does not interact significantly with Error_Prev, p = 0.113,
+#  and its interaction with Predictability is addressed in 17c)
+# -------------------------------------------------------------
+cat("\n=== MAIN EFFECT - BLOCK (RT) ===\n")
+emm_block_RT <- emmeans(modelo_2_RT, ~ Block_Factor,
+                        tran = "log", type = "response")
+print(emm_block_RT)
+print(pairs(emm_block_RT, adjust = "BH"))
+
+
+# -------------------------------------------------------------
+# 17b. PREDICTABILITY × PREVIOUS-ERROR INTERACTION
+# (p = 0.012; collapsed over Block)
+# -------------------------------------------------------------
+cat("\n=== INTERACTION: PREDICTABILITY × PREVIOUS-ERROR (RT) ===\n")
+emm_PxE_RT <- emmeans(modelo_2_RT,
+                      ~ Predictability * Error_Prev,
+                      tran = "log", type = "response")
+print(emm_PxE_RT)
+
+# Simple effect of Predictability within each Error_Prev
+cat("\n--- Predictability | Error_Prev ---\n")
+print(pairs(emmeans(modelo_2_RT, ~ Predictability | Error_Prev,
+                    tran = "log", type = "response"),
+            adjust = "BH"))
+
+# Simple effect of Error_Prev within each Predictability
+cat("\n--- Error_Prev | Predictability ---\n")
+print(pairs(emmeans(modelo_2_RT, ~ Error_Prev | Predictability,
+                    tran = "log", type = "response"),
+            adjust = "BH"))
+
+
+# -------------------------------------------------------------
+# 17c. PREDICTABILITY × BLOCK INTERACTION
+# (p = 0.043; collapsed over Error_Prev)
+# -------------------------------------------------------------
+cat("\n=== INTERACTION: PREDICTABILITY × BLOCK (RT) ===\n")
+emm_PxB_RT <- emmeans(modelo_2_RT,
+                      ~ Predictability * Block_Factor,
+                      tran = "log", type = "response")
+print(emm_PxB_RT)
+
+# Simple effect of Predictability within each Block
+cat("\n--- Predictability | Block ---\n")
+print(pairs(emmeans(modelo_2_RT, ~ Predictability | Block_Factor,
+                    tran = "log", type = "response"),
+            adjust = "BH"))
+
+# Simple effect of Block within each Predictability
+cat("\n--- Block | Predictability ---\n")
+print(pairs(emmeans(modelo_2_RT, ~ Block_Factor | Predictability,
+                    tran = "log", type = "response"),
+            adjust = "BH"))
+
+
+###############################################################
+# 18. RT - VISUALIZATION
+###############################################################
+
+# --- Plot 1: Predictability × Error_Prev (collapsed over Block) ---
+df_plot_PxE <- as.data.frame(emm_PxE_RT)
+
+p_RT_PxE <- ggplot(df_plot_PxE,
+                   aes(x = Error_Prev, y = response,
+                       color = Predictability, group = Predictability)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0.1, size = 0.8) +
+  scale_color_manual(values = c("Predictable"   = "grey60",
+                                "Unpredictable" = "black")) +
+  labs(x = "Previous random outcome",
+       y = "EMM of Response Time (ms)",
+       title = "Predictability × Previous-Error") +
+  theme_minimal() +
+  theme(
+    axis.title   = element_text(size = 16),
+    axis.text    = element_text(size = 13),
+    plot.title   = element_text(size = 15, face = "bold"),
+    legend.title = element_text(size = 12),
+    legend.text  = element_text(size = 11)
+  )
+
+print(p_RT_PxE)
+
+# --- Plot 2: Predictability × Block (collapsed over Error_Prev) ---
+df_plot_PxB <- as.data.frame(emm_PxB_RT)
+
+p_RT_PxB <- ggplot(df_plot_PxB,
+                   aes(x = Block_Factor, y = response,
+                       color = Predictability, group = Predictability)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0.1, size = 0.8) +
+  scale_color_manual(values = c("Predictable"   = "grey60",
+                                "Unpredictable" = "black")) +
+  labs(x = "Block",
+       y = "EMM of Response Time (ms)",
+       title = "Predictability × Block") +
+  theme_minimal() +
+  theme(
+    axis.title   = element_text(size = 16),
+    axis.text    = element_text(size = 13),
+    plot.title   = element_text(size = 15, face = "bold"),
+    legend.title = element_text(size = 12),
+    legend.text  = element_text(size = 11)
+  )
+
+print(p_RT_PxB)
 
 ###############################################################
 # 17. RT - TRIPLE INTERACTION VISUALIZATION
 ###############################################################
-
-# Custom plot — Predictability × Error | Block
-p_RT <- emmip(modelo_2_RT, Predictability ~ Error_Prev | Block_Factor,
-              CIs = FALSE, plotit = TRUE)
+p_RT <- emmip(modelo_2_RT,
+              Predictability ~ Error_Prev | Block_Factor,
+              CIs   = FALSE,
+              tran  = "log",
+              type  = "response",
+              plotit = TRUE)
 
 p_RT <- p_RT +
   scale_color_manual(values = c("Predictable"   = "grey60",
@@ -387,7 +538,7 @@ p_RT <- p_RT +
   facet_wrap(~ Block_Factor,
              labeller = labeller(Block_Factor = function(x) paste("Block:", x))) +
   labs(x = "Random transition result",
-       y = "EMM of Log Response Time") +
+       y = "EMM of Response Time (ms)") +
   theme(
     axis.title        = element_text(size = 18),
     axis.text         = element_text(size = 14),
@@ -400,4 +551,4 @@ p_RT <- p_RT +
   )
 
 print(p_RT)
-# ggsave("modelo_2_RT.png", plot = p_RT, width = 10, height = 6, dpi = 300)
+# ggsave("modelo_2_RT.png", plot = p_RT, width = 10, height = 6, dpi = 600)
