@@ -164,13 +164,13 @@ p_FDI <- p_FDI +
     strip.text        = element_text(size = 16),
     legend.title      = element_text(size = 13),
     legend.text       = element_text(size = 12),
-    legend.position   = c(0.08, 0.98),
+    legend.position   = c(0.10, 0.98),
     legend.background = element_rect(fill = "white", color = "black"),
     legend.key        = element_rect(fill = "white")
   )
 
 print(p_FDI)
-# ggsave("modelo_2_FDI.png", plot = p_FDI, width = 10, height = 6, dpi = 600)
+# ggsave("modelo_2_FDI.png", plot = p_FDI, width = 14, height = 8, dpi = 600)
 
 
 ###############################################################
@@ -290,13 +290,13 @@ p_FDS <- p_FDS +
     strip.text        = element_text(size = 16),
     legend.title      = element_text(size = 13),
     legend.text       = element_text(size = 12),
-    legend.position   = c(0.08, 0.98),
+    legend.position   = c(0.10, 0.98),
     legend.background = element_rect(fill = "white", color = "black"),
     legend.key        = element_rect(fill = "white")
   )
 
 print(p_FDS)
-# ggsave("modelo_2_FDS.png", plot = p_FDS, width = 10, height = 6, dpi = 600)
+# ggsave("modelo_2_FDS.png", plot = p_FDS, width = 14, height = 8, dpi = 600)
 
 ###############################################################
 #                                                             #
@@ -551,4 +551,4 @@ p_RT <- p_RT +
   )
 
 print(p_RT)
-# ggsave("modelo_2_RT.png", plot = p_RT, width = 10, height = 6, dpi = 600)
+ggsave("modelo_2_RT.png", plot = p_RT, width = 14, height = 8, dpi = 600)
