@@ -465,6 +465,17 @@ print(pairs(emmeans(modelo_2_RT, ~ Block_Factor | Predictability,
                     tran = "log", type = "response"),
             adjust = "BH"))
 
+# Pairwise contrasts
+pairs(emmeans(modelo_2_RT, ~ Predictability, tran = "log", type = "response"))
+pairs(emmeans(modelo_2_RT, ~ Error_Prev,    tran = "log", type = "response"))
+
+
+# -------------------------------------------------------------
+# 17d. PREDICTABILITY and PREV_ERROR MAIN EFFECTS
+# -------------------------------------------------------------
+
+emmeans(modelo_2_RT, ~ Predictability, tran = "log", type = "response")
+emmeans(modelo_2_RT, ~ Error_Prev,    tran = "log", type = "response")
 
 ###############################################################
 # 18. RT - VISUALIZATION
