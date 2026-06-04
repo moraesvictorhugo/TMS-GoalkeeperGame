@@ -123,6 +123,15 @@ fdi_model <- lmer(
 print(summary(fdi_model))
 print(anova(fdi_model, type = 3))
 
+
+
+
+
+
+
+
+
+
 ###############################################################
 # 5. AGGREGATED ANALYSIS BY PARTICIPANT × CONDITION
 ###############################################################
@@ -164,92 +173,92 @@ rt_rm  <- rm_anova_by_outcome(dat_rt,  "Reaction Time")
 fds_rm <- rm_anova_by_outcome(dat_fds, "FDS MEP")
 fdi_rm <- rm_anova_by_outcome(dat_fdi, "FDI MEP")
 
-###############################################################
-# 6. SENSITIVITY: BLOCK AS ORDERED (LINEAR & QUADRATIC TRENDS)
-###############################################################
+# ###############################################################
+# # 6. SENSITIVITY: BLOCK AS ORDERED (LINEAR & QUADRATIC TRENDS)
+# ###############################################################
 
-# Blocks 2, 4, 6 are ordered in time. Testing linear and quadratic
-# contrasts clarifies whether effects evolve progressively across
-# task exposure.
+# # Blocks 2, 4, 6 are ordered in time. Testing linear and quadratic
+# # contrasts clarifies whether effects evolve progressively across
+# # task exposure.
 
-# ---- Create orthogonal polynomial contrasts for Block ----
-dat_rt <- dat_rt %>% mutate(
-  Block_linear    = case_when(block_info == 2 ~ -1,
-                              block_info == 4 ~  0,
-                              block_info == 6 ~  1),
-  Block_quadratic = case_when(block_info == 2 ~  1,
-                              block_info == 4 ~ -2,
-                              block_info == 6 ~  1)
-)
+# # ---- Create orthogonal polynomial contrasts for Block ----
+# dat_rt <- dat_rt %>% mutate(
+#   Block_linear    = case_when(block_info == 2 ~ -1,
+#                               block_info == 4 ~  0,
+#                               block_info == 6 ~  1),
+#   Block_quadratic = case_when(block_info == 2 ~  1,
+#                               block_info == 4 ~ -2,
+#                               block_info == 6 ~  1)
+# )
 
-dat_fds <- dat_fds %>% mutate(
-  Block_linear    = case_when(block_info == 2 ~ -1,
-                              block_info == 4 ~  0,
-                              block_info == 6 ~  1),
-  Block_quadratic = case_when(block_info == 2 ~  1,
-                              block_info == 4 ~ -2,
-                              block_info == 6 ~  1)
-)
+# dat_fds <- dat_fds %>% mutate(
+#   Block_linear    = case_when(block_info == 2 ~ -1,
+#                               block_info == 4 ~  0,
+#                               block_info == 6 ~  1),
+#   Block_quadratic = case_when(block_info == 2 ~  1,
+#                               block_info == 4 ~ -2,
+#                               block_info == 6 ~  1)
+# )
 
-dat_fdi <- dat_fdi %>% mutate(
-  Block_linear    = case_when(block_info == 2 ~ -1,
-                              block_info == 4 ~  0,
-                              block_info == 6 ~  1),
-  Block_quadratic = case_when(block_info == 2 ~  1,
-                              block_info == 4 ~ -2,
-                              block_info == 6 ~  1)
-)
+# dat_fdi <- dat_fdi %>% mutate(
+#   Block_linear    = case_when(block_info == 2 ~ -1,
+#                               block_info == 4 ~  0,
+#                               block_info == 6 ~  1),
+#   Block_quadratic = case_when(block_info == 2 ~  1,
+#                               block_info == 4 ~ -2,
+#                               block_info == 6 ~  1)
+# )
 
-# =============================================================
-# 6.1 Main ordered model (linear trend with full random structure)
-# =============================================================
+# # =============================================================
+# # 6.1 Main ordered model (linear trend with full random structure)
+# # =============================================================
 
-fit_ordered_main <- function(data, outcome_label, ctrl) {
+# fit_ordered_main <- function(data, outcome_label, ctrl) {
   
-  cat("\n=====================================================\n")
-  cat("Ordered model (linear) -", outcome_label, "\n")
-  cat("=====================================================\n")
+#   cat("\n=====================================================\n")
+#   cat("Ordered model (linear) -", outcome_label, "\n")
+#   cat("=====================================================\n")
   
-  m_ord <- lmer(
-    log_y ~ Predictability * Error_Prev * Block_linear + trial_in_block_z +
-      (1 + P_unpred + E_error + Block_linear + trial_in_block_z || volunteer),
-    data = data, REML = TRUE, control = ctrl
-  )
+#   m_ord <- lmer(
+#     log_y ~ Predictability * Error_Prev * Block_linear + trial_in_block_z +
+#       (1 + P_unpred + E_error + Block_linear + trial_in_block_z || volunteer),
+#     data = data, REML = TRUE, control = ctrl
+#   )
   
-  print(summary(m_ord))
-  print(anova(m_ord, type = 3))
+#   print(summary(m_ord))
+#   print(anova(m_ord, type = 3))
   
-  invisible(m_ord)
-}
+#   invisible(m_ord)
+# }
 
-rt_ord  <- fit_ordered_main(dat_rt,  "Reaction Time", ctrl)
-fds_ord <- fit_ordered_main(dat_fds, "FDS MEP",       ctrl)
-fdi_ord <- fit_ordered_main(dat_fdi, "FDI MEP",       ctrl)
+# rt_ord  <- fit_ordered_main(dat_rt,  "Reaction Time", ctrl)
+# fds_ord <- fit_ordered_main(dat_fds, "FDS MEP",       ctrl)
+# fdi_ord <- fit_ordered_main(dat_fdi, "FDI MEP",       ctrl)
 
 
-# =============================================================
-# 6.2 Polynomial model (linear + quadratic, random intercept only)
-# =============================================================
+# # =============================================================
+# # 6.2 Polynomial model (linear + quadratic, random intercept only)
+# # =============================================================
 
-fit_ordered_poly <- function(data, outcome_label) {
+# fit_ordered_poly <- function(data, outcome_label) {
   
-  cat("\n=====================================================\n")
-  cat("Polynomial model (linear + quadratic) -", outcome_label, "\n")
-  cat("=====================================================\n")
+#   cat("\n=====================================================\n")
+#   cat("Polynomial model (linear + quadratic) -", outcome_label, "\n")
+#   cat("=====================================================\n")
   
-  m_poly <- lmer(
-    log_y ~ Predictability * Error_Prev * (Block_linear + Block_quadratic) +
-      (1 | volunteer),
-    data = data, REML = TRUE
-  )
+#   m_poly <- lmer(
+#     log_y ~ Predictability * Error_Prev * (Block_linear + Block_quadratic) +
+#       (1 | volunteer),
+#     data = data, REML = TRUE
+#   )
   
-  print(summary(m_poly))
-  print(anova(m_poly, type = 3))
+#   print(summary(m_poly))
+#   print(anova(m_poly, type = 3))
   
-  invisible(m_poly)
-}
+#   invisible(m_poly)
+# }
 
-rt_poly  <- fit_ordered_poly(dat_rt,  "Reaction Time")
-fds_poly <- fit_ordered_poly(dat_fds, "FDS MEP")
-fdi_poly <- fit_ordered_poly(dat_fdi, "FDI MEP")
+# rt_poly  <- fit_ordered_poly(dat_rt,  "Reaction Time")
+# fds_poly <- fit_ordered_poly(dat_fds, "FDS MEP")
+# fdi_poly <- fit_ordered_poly(dat_fdi, "FDI MEP")
 
