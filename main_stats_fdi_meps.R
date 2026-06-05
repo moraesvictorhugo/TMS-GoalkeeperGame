@@ -1,6 +1,6 @@
 ###############################################################
 # LINEAR MIXED EFFECTS MODELS - MEPs FDI ANALYSIS
-# Order: Robust model > Main model > Aggregated RM-ANOVA
+# Order: Robust model > Simplest model > Aggregated RM-ANOVA
 ###############################################################
 
 
@@ -143,7 +143,7 @@ print(emmeans(fdi_model,
 
 ###############################################################
 #                                                             #
-#                       MAIN MODEL                            #
+#                       Simplest MODEL                        #
 #                                                             #
 ###############################################################
 
