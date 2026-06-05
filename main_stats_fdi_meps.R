@@ -100,8 +100,25 @@ print(summary(fdi_model))
 cat("\n=== TYPE III ANOVA - FDI ROBUST MODEL ===\n")
 print(anova(fdi_model, type = 3))
 
-cat("\n=== SINGULAR FIT CHECK - FDI ROBUST MODEL ===\n")
+
+# ========================================
+# DIAGNOSTICS
+# ========================================
+
+# --- 1. Computational fit ---
+cat("\n=== SINGULAR FIT CHECK - FDI MODEL ===\n")
 print(isSingular(fdi_model))
+
+# Convergence (was missing!)
+cat("\n=== CONVERGENCE MESSAGES ===\n")
+print(fdi_model@optinfo$conv$lme4$messages)
+
+# --- 2. Variance structure ---
+cat("\n=== VARIANCE COMPONENTS ===\n")
+print(VarCorr(fdi_model))
+
+# --- 3. Assumptions (plot) ---
+print(check_model(fdi_model))
 
 
 ###############################################################
