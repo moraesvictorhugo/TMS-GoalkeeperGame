@@ -1,6 +1,6 @@
 ###############################################################
 # LINEAR MIXED EFFECTS MODELS - MEPs FDS ANALYSIS
-# Order: Robust model > Main model > Aggregated RM-ANOVA
+# Order: Robust model > Simplest model > Aggregated RM-ANOVA
 ###############################################################
 
 
@@ -90,6 +90,7 @@ cat("\n=== FITTING ROBUST MODEL FDS (random slopes) ===\n")
 
 ctrl <- lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
 
+# Model
 fds_model <- lmer(
   log_MEP_FDS ~ Predictability * Error_Prev * Block_Factor + trial_in_block_z +
     (1 + P_unpred + E_error + B4 + B6 + trial_in_block_z || volunteer),
@@ -101,8 +102,24 @@ print(summary(fds_model))
 cat("\n=== TYPE III ANOVA - FDS ROBUST MODEL ===\n")
 print(anova(fds_model, type = 3))
 
-cat("\n=== SINGULAR FIT CHECK - FDS ROBUST MODEL ===\n")
+# ========================================
+# DIAGNOSTICS
+# ========================================
+
+# --- 1. Computational fit ---
+cat("\n=== SINGULAR FIT CHECK - FDS MODEL ===\n")
 print(isSingular(fds_model))
+
+# Convergence
+cat("\n=== CONVERGENCE MESSAGES ===\n")
+print(fds_model@optinfo$conv$lme4$messages)
+
+# --- 2. Variance structure ---
+cat("\n=== VARIANCE COMPONENTS ===\n")
+print(VarCorr(fds_model))
+
+# --- 3. Assumptions (plot) ---
+print(check_model(fds_model))
 
 
 ###############################################################
@@ -142,15 +159,15 @@ print(pairs(emm_block_FDS_rob, adjust = "BH"))
 
 ###############################################################
 #                                                             #
-#                       MAIN MODEL                            #
+#                       Simplest MODEL                        #
 #                                                             #
 ###############################################################
 
 ###############################################################
-# 7. FDS - MAIN MODEL: Predictability × Error × Block
+# 7. FDS - SIMPLEST MODEL: Predictability × Error × Block
 ###############################################################
 
-cat("\n=== FITTING MAIN MODEL FDS: Predictability × Error × Block ===\n")
+cat("\n=== FITTING SIMPLEST MODEL FDS: Predictability × Error × Block ===\n")
 
 modelo_2_FDS <- lmer(
   log_MEP_FDS ~ Predictability * Error_Prev * Block_Factor + (1 | volunteer),
@@ -164,21 +181,40 @@ print(anova(modelo_2_FDS, type = 3))
 
 check_model(modelo_2_FDS)
 
+# ========================================
+# DIAGNOSTICS
+# ========================================
+
+# --- 1. Computational fit ---
+cat("\n=== SINGULAR FIT CHECK - FDS MODEL ===\n")
+print(isSingular(modelo_2_FDS))
+
+# Convergence
+cat("\n=== CONVERGENCE MESSAGES ===\n")
+print(modelo_2_FDS@optinfo$conv$lme4$messages)
+
+# --- 2. Variance structure ---
+cat("\n=== VARIANCE COMPONENTS ===\n")
+print(VarCorr(modelo_2_FDS))
+
+# --- 3. Assumptions (plot) ---
+print(check_model(modelo_2_FDS))
+
 
 ###############################################################
-# 8. FDS - EFFECT SIZES (MAIN MODEL)
+# 8. FDS - EFFECT SIZES (SIMPLEST MODEL)
 ###############################################################
 
-cat("\n=== R² (marginal & conditional) - FDS MAIN MODEL ===\n")
+cat("\n=== R² (marginal & conditional) - FDS SIMPLEST MODEL ===\n")
 print(performance::r2(modelo_2_FDS))
 
-cat("\n=== PARTIAL ETA² - FDS MAIN MODEL ===\n")
+cat("\n=== PARTIAL ETA² - FDS SIMPLEST MODEL ===\n")
 print(effectsize::eta_squared(anova(modelo_2_FDS, type = 3),
                               partial = TRUE, ci = 0.95))
 
 
 ###############################################################
-# 9. FDS - POST-HOC (EMMEANS) - MAIN MODEL (main effects only)
+# 9. FDS - POST-HOC (EMMEANS) - SIMPLEST MODEL (main effects only)
 ###############################################################
 
 cat("\n=== MARGINAL MEANS - PREDICTABILITY (FDS) ===\n")
@@ -201,7 +237,7 @@ print(pairs(emm_block_FDS, adjust = "BH"))
 
 
 ###############################################################
-# 10. FDS - TRIPLE INTERACTION VISUALIZATION (MAIN MODEL)
+# 10. FDS - TRIPLE INTERACTION VISUALIZATION (SIMPLEST MODEL)
 ###############################################################
 
 p_FDS <- emmip(modelo_2_FDS,
@@ -227,8 +263,8 @@ p_FDS <- p_FDS +
   )
 
 print(p_FDS)
-ggsave("/analysis_output/modelo_2_FDS.png", plot = p_FDS,
-       width = 14, height = 8, dpi = 900)
+# ggsave("/analysis_outputs/modelo_2_FDS.png", plot = p_FDS,
+#        width = 14, height = 8, dpi = 900)
 
 
 ###############################################################
@@ -264,6 +300,7 @@ fds_rm <- anova_test(
 cat("\n=== RM-ANOVA TABLE (Greenhouse-Geisser) - FDS ===\n")
 print(get_anova_table(fds_rm, correction = "GG"))
 
+
 ###############################################################
 # 12. FDS - COMPARATIVE RESULTS TABLE
 ###############################################################
@@ -276,7 +313,7 @@ normalize_term <- function(x) {
 extract_lmer <- function(model, label) {
   aov_tab <- as.data.frame(anova(model, type = 3))
   eta     <- as.data.frame(effectsize::eta_squared(anova(model, type = 3),
-                                                   partial = TRUE, ci = NA))
+                                                   partial = TRUE, ci = NULL))
   tibble(
     Term  = normalize_term(rownames(aov_tab)),
     F     = round(aov_tab$`F value`, 3),
@@ -297,16 +334,15 @@ extract_rm <- function(rm_obj, label) {
   ) %>% rename_with(~ paste0(.x, "_", label), -Term)
 }
 
-tab_robust <- extract_lmer(fds_model,     "Robust")
-tab_main   <- extract_lmer(modelo_2_FDS,  "Main")
-tab_rm     <- extract_rm(fds_rm,          "RM")
+tab_robust   <- extract_lmer(fds_model,     "Robust")
+tab_simplest <- extract_lmer(modelo_2_FDS,  "SIMPLEST")
+tab_rm       <- extract_rm(fds_rm,          "RM")
 
 comparison_FDS <- tab_robust %>%
-  full_join(tab_main, by = "Term") %>%
-  full_join(tab_rm,   by = "Term")
+  full_join(tab_simplest, by = "Term") %>%
+  full_join(tab_rm,       by = "Term")
 
 cat("\n=== COMPARATIVE RESULTS TABLE - FDS ===\n")
 print(as.data.frame(comparison_FDS), row.names = FALSE)
 
-write.csv(comparison_FDS, "comparison_FDS.csv", row.names = FALSE)
-
+# write.csv(comparison_FDS, "comparison_FDS.csv", row.names = FALSE)

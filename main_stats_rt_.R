@@ -1,6 +1,6 @@
 ###############################################################
 # LINEAR MIXED EFFECTS MODELS - RTs ANALYSIS
-# Order: Robust model > Main model > Aggregated RM-ANOVA
+# Order: Robust model > Simplest model > Aggregated RM-ANOVA
 ###############################################################
 
 ###############################################################
@@ -91,6 +91,7 @@ cat("\n=== FITTING ROBUST MODEL RT (random slopes) ===\n")
 
 ctrl <- lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
 
+# Model
 rt_model <- lmer(
   log_RT ~ Predictability * Error_Prev * Block_Factor + trial_in_block_z +
     (1 + P_unpred + E_error + B4 + B6 + trial_in_block_z || volunteer),
@@ -102,8 +103,24 @@ print(summary(rt_model))
 cat("\n=== TYPE III ANOVA - RT ROBUST MODEL ===\n")
 print(anova(rt_model, type = 3))
 
-cat("\n=== SINGULAR FIT CHECK - RT ROBUST MODEL ===\n")
+# ========================================
+# DIAGNOSTICS
+# ========================================
+
+# --- 1. Computational fit ---
+cat("\n=== SINGULAR FIT CHECK - RT MODEL ===\n")
 print(isSingular(rt_model))
+
+# Convergence
+cat("\n=== CONVERGENCE MESSAGES ===\n")
+print(rt_model@optinfo$conv$lme4$messages)
+
+# --- 2. Variance structure ---
+cat("\n=== VARIANCE COMPONENTS ===\n")
+print(VarCorr(rt_model))
+
+# --- 3. Assumptions (plot) ---
+print(check_model(rt_model))
 
 
 ###############################################################
@@ -156,15 +173,15 @@ print(pairs(emmeans(rt_model, ~ Block_Factor | Predictability,
 
 ###############################################################
 #                                                             #
-#                       MAIN MODEL                            #
+#                       Simplest MODEL                        #
 #                                                             #
 ###############################################################
 
 ###############################################################
-# 7. RT - MAIN MODEL: Predictability × Error × Block
+# 7. RT - SIMPLEST MODEL: Predictability × Error × Block
 ###############################################################
 
-cat("\n=== FITTING MAIN MODEL RT: Predictability × Error × Block ===\n")
+cat("\n=== FITTING SIMPLEST MODEL RT: Predictability × Error × Block ===\n")
 
 modelo_2_RT <- lmer(
   log_RT ~ Predictability * Error_Prev * Block_Factor + (1 | volunteer),
@@ -178,21 +195,40 @@ print(anova(modelo_2_RT, type = 3))
 
 check_model(modelo_2_RT)
 
+# ========================================
+# DIAGNOSTICS
+# ========================================
+
+# --- 1. Computational fit ---
+cat("\n=== SINGULAR FIT CHECK - RT MODEL ===\n")
+print(isSingular(modelo_2_RT))
+
+# Convergence
+cat("\n=== CONVERGENCE MESSAGES ===\n")
+print(modelo_2_RT@optinfo$conv$lme4$messages)
+
+# --- 2. Variance structure ---
+cat("\n=== VARIANCE COMPONENTS ===\n")
+print(VarCorr(modelo_2_RT))
+
+# --- 3. Assumptions (plot) ---
+print(check_model(modelo_2_RT))
+
 
 ###############################################################
-# 8. RT - EFFECT SIZES (MAIN MODEL)
+# 8. RT - EFFECT SIZES (SIMPLEST MODEL)
 ###############################################################
 
-cat("\n=== R² (marginal & conditional) - RT MAIN MODEL ===\n")
+cat("\n=== R² (marginal & conditional) - RT SIMPLEST MODEL ===\n")
 print(performance::r2(modelo_2_RT))
 
-cat("\n=== PARTIAL ETA² - RT MAIN MODEL ===\n")
+cat("\n=== PARTIAL ETA² - RT SIMPLEST MODEL ===\n")
 print(effectsize::eta_squared(anova(modelo_2_RT, type = 3),
                               partial = TRUE, ci = 0.95))
 
 
 ###############################################################
-# 9. RT - POST-HOC (EMMEANS) - MAIN MODEL
+# 9. RT - POST-HOC (EMMEANS) - SIMPLEST MODEL
 ###############################################################
 # Three-way interaction non-significant (p = 0.792);
 # two significant two-way interactions decomposed below.
@@ -203,6 +239,13 @@ emm_block_RT <- emmeans(modelo_2_RT, ~ Block_Factor,
                         tran = "log", type = "response")
 print(emm_block_RT)
 print(pairs(emm_block_RT, adjust = "BH"))
+
+# Predictability main effect
+cat("\n=== MAIN EFFECT - PREDICTABILITY (RT) ===\n")
+emm_predictability_RT <- emmeans(modelo_2_RT, ~ Predictability,
+                        tran = "log", type = "response")
+print(emm_predictability_RT)
+print(pairs(emm_predictability_RT, adjust = "BH"))
 
 # Predictability × Previous-Error interaction (p = 0.012)
 cat("\n=== INTERACTION: PREDICTABILITY × PREVIOUS-ERROR (RT) ===\n")
@@ -230,7 +273,7 @@ print(pairs(emmeans(modelo_2_RT, ~ Block_Factor | Predictability,
 
 
 ###############################################################
-# 10. RT - VISUALIZATION (MAIN MODEL)
+# 10. RT - VISUALIZATION (SIMPLEST MODEL)
 ###############################################################
 
 # --- Plot 1: Predictability × Error_Prev (collapsed over Block) ---
@@ -245,7 +288,7 @@ p_RT_PxE <- ggplot(df_plot_PxE,
                 width = 0.1, size = 0.8) +
   scale_color_manual(values = c("Predictable"   = "grey60",
                                 "Unpredictable" = "black")) +
-  labs(x = "Previous random outcome",
+  labs(x = "Previous random transition result",
        y = "EMM of Response Time (ms)",
        title = "Predictability × Previous-Error") +
   theme_minimal() +
@@ -258,6 +301,11 @@ p_RT_PxE <- ggplot(df_plot_PxE,
   )
 
 print(p_RT_PxE)
+
+# Save fig
+# Salva em PNG 900 dpi
+ggsave("plot_RT_PxE.png", plot = p_RT_PxE,
+       width = 7, height = 5, units = "in", dpi = 600)
 
 # --- Plot 2: Predictability × Block (collapsed over Error_Prev) ---
 df_plot_PxB <- as.data.frame(emm_PxB_RT)
@@ -309,8 +357,8 @@ p_RT <- p_RT +
   )
 
 print(p_RT)
-ggsave("analysis_output/modelo_2_RT.png", plot = p_RT,
-       width = 14, height = 8, dpi = 900)
+# ggsave("/analysis_outputs/modelo_2_RT.png", plot = p_RT,
+#        width = 14, height = 8, dpi = 900)
 
 
 ###############################################################
@@ -346,6 +394,7 @@ rt_rm <- anova_test(
 cat("\n=== RM-ANOVA TABLE (Greenhouse-Geisser) - RT ===\n")
 print(get_anova_table(rt_rm, correction = "GG"))
 
+
 ###############################################################
 # 12. RT - COMPARATIVE RESULTS TABLE
 ###############################################################
@@ -358,7 +407,7 @@ normalize_term <- function(x) {
 extract_lmer <- function(model, label) {
   aov_tab <- as.data.frame(anova(model, type = 3))
   eta     <- as.data.frame(effectsize::eta_squared(anova(model, type = 3),
-                                                   partial = TRUE, ci = NA))
+                                                   partial = TRUE, ci = NULL))
   tibble(
     Term  = normalize_term(rownames(aov_tab)),
     F     = round(aov_tab$`F value`, 3),
@@ -379,16 +428,15 @@ extract_rm <- function(rm_obj, label) {
   ) %>% rename_with(~ paste0(.x, "_", label), -Term)
 }
 
-tab_robust <- extract_lmer(rt_model,     "Robust")
-tab_main   <- extract_lmer(modelo_2_RT,  "Main")
-tab_rm     <- extract_rm(rt_rm,          "RM")
+tab_robust   <- extract_lmer(rt_model,     "Robust")
+tab_simplest <- extract_lmer(modelo_2_RT,  "SIMPLEST")
+tab_rm       <- extract_rm(rt_rm,          "RM")
 
 comparison_RT <- tab_robust %>%
-  full_join(tab_main, by = "Term") %>%
-  full_join(tab_rm,   by = "Term")
+  full_join(tab_simplest, by = "Term") %>%
+  full_join(tab_rm,       by = "Term")
 
 cat("\n=== COMPARATIVE RESULTS TABLE - RT ===\n")
 print(as.data.frame(comparison_RT), row.names = FALSE)
 
-write.csv(comparison_RT, "comparison_RT.csv", row.names = FALSE)
-
+# write.csv(comparison_RT, "comparison_RT.csv", row.names = FALSE)

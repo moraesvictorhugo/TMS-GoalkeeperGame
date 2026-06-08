@@ -89,6 +89,7 @@ cat("\n=== FITTING ROBUST MODEL FDI (random slopes) ===\n")
 
 ctrl <- lmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
 
+# Model
 fdi_model <- lmer(
   log_MEP_FDI ~ Predictability * Error_Prev * Block_Factor + trial_in_block_z +
     (1 + P_unpred + E_error + B4 + B6 + trial_in_block_z || volunteer),
@@ -99,7 +100,6 @@ print(summary(fdi_model))
 
 cat("\n=== TYPE III ANOVA - FDI ROBUST MODEL ===\n")
 print(anova(fdi_model, type = 3))
-
 
 # ========================================
 # DIAGNOSTICS
@@ -119,7 +119,6 @@ print(VarCorr(fdi_model))
 
 # --- 3. Assumptions (plot) ---
 print(check_model(fdi_model))
-
 
 ###############################################################
 # 5. FDI - EFFECT SIZES (ROBUST MODEL)
@@ -165,10 +164,10 @@ print(emmeans(fdi_model,
 ###############################################################
 
 ###############################################################
-# 7. FDI - MAIN MODEL: Predictability × Error × Block
+# 7. FDI - SIMPLEST MODEL: Predictability × Error × Block
 ###############################################################
 
-cat("\n=== FITTING MAIN MODEL FDI: Predictability × Error × Block ===\n")
+cat("\n=== FITTING SIMPLEST MODEL FDI: Predictability × Error × Block ===\n")
 
 modelo_2_FDI <- lmer(
   log_MEP_FDI ~ Predictability * Error_Prev * Block_Factor + (1 | volunteer),
@@ -182,21 +181,39 @@ print(anova(modelo_2_FDI, type = 3))
 
 check_model(modelo_2_FDI)
 
+# ========================================
+# DIAGNOSTICS
+# ========================================
+
+# --- 1. Computational fit ---
+cat("\n=== SINGULAR FIT CHECK - FDI MODEL ===\n")
+print(isSingular(modelo_2_FDI))
+
+# Convergence (was missing!)
+cat("\n=== CONVERGENCE MESSAGES ===\n")
+print(modelo_2_FDI@optinfo$conv$lme4$messages)
+
+# --- 2. Variance structure ---
+cat("\n=== VARIANCE COMPONENTS ===\n")
+print(VarCorr(modelo_2_FDI))
+
+# --- 3. Assumptions (plot) ---
+print(check_model(modelo_2_FDI))
 
 ###############################################################
-# 8. FDI - EFFECT SIZES (MAIN MODEL)
+# 8. FDI - EFFECT SIZES (SIMPLEST MODEL)
 ###############################################################
 
-cat("\n=== R² (marginal & conditional) - FDI MAIN MODEL ===\n")
+cat("\n=== R² (marginal & conditional) - FDI SIMPLEST MODEL ===\n")
 print(performance::r2(modelo_2_FDI))
 
-cat("\n=== PARTIAL ETA² - FDI MAIN MODEL ===\n")
+cat("\n=== PARTIAL ETA² - FDI SIMPLEST MODEL ===\n")
 print(effectsize::eta_squared(anova(modelo_2_FDI, type = 3),
                               partial = TRUE, ci = 0.95))
 
 
 ###############################################################
-# 9. FDI - POST-HOC (EMMEANS) - MAIN MODEL
+# 9. FDI - POST-HOC (EMMEANS) - SIMPLEST MODEL
 ###############################################################
 
 emm_FDI <- emmeans(modelo_2_FDI,
@@ -221,7 +238,7 @@ print(emmeans(modelo_2_FDI,
 
 
 ###############################################################
-# 10. FDI - TRIPLE INTERACTION VISUALIZATION (MAIN MODEL)
+# 10. FDI - TRIPLE INTERACTION VISUALIZATION (SIMPLEST MODEL)
 ###############################################################
 
 p_FDI <- emmip(modelo_2_FDI,
@@ -247,8 +264,8 @@ p_FDI <- p_FDI +
   )
 
 print(p_FDI)
-ggsave("/analysis_outputs/modelo_2_FDI.png", plot = p_FDI,
-       width = 14, height = 8, dpi = 900)
+# ggsave("/analysis_outputs/modelo_2_FDI.png", plot = p_FDI,
+#        width = 14, height = 8, dpi = 900)
 
 
 ###############################################################
@@ -296,7 +313,7 @@ normalize_term <- function(x) {
 extract_lmer <- function(model, label) {
   aov_tab <- as.data.frame(anova(model, type = 3))
   eta     <- as.data.frame(effectsize::eta_squared(anova(model, type = 3),
-                                                   partial = TRUE, ci = NA))
+                                                   partial = TRUE, ci = NULL))
   tibble(
     Term  = normalize_term(rownames(aov_tab)),
     F     = round(aov_tab$`F value`, 3),
@@ -318,14 +335,14 @@ extract_rm <- function(rm_obj, label) {
 }
 
 tab_robust <- extract_lmer(fdi_model,     "Robust")
-tab_main   <- extract_lmer(modelo_2_FDI,  "Main")
+tab_simplest   <- extract_lmer(modelo_2_FDI, "SIMPLEST")
 tab_rm     <- extract_rm(fdi_rm,          "RM")
 
 comparison_FDI <- tab_robust %>%
-  full_join(tab_main, by = "Term") %>%
+  full_join(tab_simplest, by = "Term") %>%
   full_join(tab_rm,   by = "Term")
 
 cat("\n=== COMPARATIVE RESULTS TABLE - FDI ===\n")
 print(as.data.frame(comparison_FDI), row.names = FALSE)
 
-write.csv(comparison_FDI, "comparison_FDI.csv", row.names = FALSE)
+# write.csv(comparison_FDI, "comparison_FDI.csv", row.names = FALSE)
