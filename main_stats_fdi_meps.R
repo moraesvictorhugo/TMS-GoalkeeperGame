@@ -118,7 +118,17 @@ cat("\n=== VARIANCE COMPONENTS ===\n")
 print(VarCorr(fdi_model))
 
 # --- 3. Assumptions (plot) ---
-print(check_model(fdi_model))
+p <- plot(check_model(fdi_model))
+
+# Save fig
+ggsave(
+  filename = "check_robust_model_fdi.png",
+  plot     = p,
+  dpi      = 600,
+  width    = 20,
+  height   = 18,
+  units    = "in"
+)
 
 ###############################################################
 # 5. FDI - EFFECT SIZES (ROBUST MODEL)
