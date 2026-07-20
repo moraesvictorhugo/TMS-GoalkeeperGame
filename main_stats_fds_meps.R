@@ -156,6 +156,57 @@ emm_block_FDS_rob <- emmeans(fds_model, ~ Block_Factor,
 print(emm_block_FDS_rob)
 print(pairs(emm_block_FDS_rob, adjust = "BH"))
 
+###############################################################
+# 7. FDS - TRIPLE INTERACTION VISUALIZATION (ROBUST MODEL)
+###############################################################
+
+p_FDS_robust <- emmip(
+  fds_model,
+  Predictability ~ Error_Prev | Block_Factor,
+  at = list(trial_in_block_z = 0),
+  CIs = FALSE,
+  tran = "log",
+  type = "response",
+  plotit = TRUE
+)
+
+p_FDS_robust <- p_FDS_robust +
+  scale_color_manual(
+    values = c(
+      "Predictable"   = "grey60",
+      "Unpredictable" = "black"
+    )
+  ) +
+  facet_wrap(
+    ~ Block_Factor,
+    labeller = labeller(Block_Factor = function(x) paste("Block:", x))
+  ) +
+  labs(
+    x = "Random transition result",
+    y = "EMM of MEP amplitude in FDI (µV)",
+    color = "Predictability"
+  ) +
+  theme(
+    axis.title        = element_text(size = 14),
+    axis.text         = element_text(size = 8),
+    strip.text        = element_text(size = 12),
+    legend.title      = element_text(size = 10),
+    legend.text       = element_text(size = 8),
+    legend.position   = c(0.10, 0.98),
+    legend.background = element_rect(fill = "white", color = "black"),
+    legend.key        = element_rect(fill = "white")
+  )
+
+print(p_FDS_robust)
+
+ggsave(
+  filename = "FDS_robust_triple_interaction.pdf",
+  plot = p_FDS_robust,
+  width = 180,
+  height = 120,
+  units = "mm",
+  device = cairo_pdf
+)
 
 ###############################################################
 #                                                             #

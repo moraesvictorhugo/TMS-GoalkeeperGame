@@ -346,20 +346,26 @@ p_RT <- p_RT +
   labs(x = "Random transition result",
        y = "EMM of Response Time (ms)") +
   theme(
-    axis.title        = element_text(size = 18),
-    axis.text         = element_text(size = 14),
-    strip.text        = element_text(size = 16),
-    legend.title      = element_text(size = 13),
-    legend.text       = element_text(size = 12),
-    legend.position   = c(0.92, 0.98),
+    axis.title        = element_text(size = 14),
+    axis.text         = element_text(size = 8),
+    strip.text        = element_text(size = 12),
+    legend.title      = element_text(size = 10),
+    legend.text       = element_text(size = 8),
+    legend.position   = c(0.90, 0.98),
     legend.background = element_rect(fill = "white", color = "black"),
     legend.key        = element_rect(fill = "white")
   )
 
 print(p_RT)
-# ggsave("/analysis_outputs/modelo_2_RT.png", plot = p_RT,
-#        width = 14, height = 8, dpi = 900)
 
+ggsave(
+  filename = "RT_simple.pdf",
+  plot = p_RT,
+  width = 180,
+  height = 100,
+  units = "mm",
+  device = cairo_pdf
+)
 
 ###############################################################
 #                                                             #

@@ -121,14 +121,14 @@ print(VarCorr(fdi_model))
 p <- plot(check_model(fdi_model))
 
 # Save fig
-ggsave(
-  filename = "check_robust_model_fdi.png",
-  plot     = p,
-  dpi      = 600,
-  width    = 20,
-  height   = 18,
-  units    = "in"
-)
+# ggsave(
+#   filename = "check_robust_model_fdi.png",
+#   plot     = p,
+#   dpi      = 600,
+#   width    = 20,
+#   height   = 18,
+#   units    = "in"
+# )
 
 ###############################################################
 # 5. FDI - EFFECT SIZES (ROBUST MODEL)
@@ -166,6 +166,57 @@ print(emmeans(fdi_model,
               pairwise ~ Error_Prev | Predictability * Block_Factor,
               tran = "log", type = "response", adjust = "BH"))
 
+###############################################################
+# 7. FDI - TRIPLE INTERACTION VISUALIZATION (ROBUST MODEL)
+###############################################################
+
+p_FDI_robust <- emmip(
+  fdi_model,
+  Predictability ~ Error_Prev | Block_Factor,
+  at = list(trial_in_block_z = 0),
+  CIs = FALSE,
+  tran = "log",
+  type = "response",
+  plotit = TRUE
+)
+
+p_FDI_robust <- p_FDI_robust +
+  scale_color_manual(
+    values = c(
+      "Predictable"   = "grey60",
+      "Unpredictable" = "black"
+    )
+  ) +
+  facet_wrap(
+    ~ Block_Factor,
+    labeller = labeller(Block_Factor = function(x) paste("Block:", x))
+  ) +
+  labs(
+    x = "Random transition result",
+    y = "EMM of MEP amplitude in FDI (µV)",
+    color = "Predictability"
+  ) +
+  theme(
+    axis.title        = element_text(size = 14),
+    axis.text         = element_text(size = 8),
+    strip.text        = element_text(size = 12),
+    legend.title      = element_text(size = 10),
+    legend.text       = element_text(size = 8),
+    legend.position   = c(0.10, 0.98),
+    legend.background = element_rect(fill = "white", color = "black"),
+    legend.key        = element_rect(fill = "white")
+  )
+
+print(p_FDI_robust)
+
+ggsave(
+  filename = "FDI_robust_triple_interaction.pdf",
+  plot = p_FDI_robust,
+  width = 180,
+  height = 120,
+  units = "mm",
+  device = cairo_pdf
+)
 
 ###############################################################
 #                                                             #

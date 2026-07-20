@@ -41,10 +41,10 @@ dunn_results <- data_long %>%
 
 big_theme <- theme_pubr() +
   theme(
-    axis.title = element_text(size = 20),
-    axis.text  = element_text(size = 16),
-    legend.title = element_text(size = 16),
-    legend.text  = element_text(size = 14)
+    axis.title = element_text(size = 12),
+    axis.text  = element_text(size = 12),
+    legend.title = element_text(size = 10),
+    legend.text  = element_text(size = 10)
   )
 
 # =======================
@@ -63,43 +63,44 @@ p <- ggplot(data_long, aes(Block, SuccessRate)) +
 
 print(p)
 
-ggsave(
-  "sucessRate_plot.png",
-  plot = p,
-  width = 10,
-  height = 6,
-  dpi = 300
-)
-
 # =======================
 # Plot with significance
 # =======================
 
 dunn_sig <- dunn_results %>%
   filter(p.adj <= 0.05) %>%
-  add_y_position(fun = "max", step.increase = 0.3)
+  arrange(group1, group2) %>%
+  mutate(y.position = 1.03 + 0.045 * (row_number() - 1))
 
 p_sig <- ggplot(data_long, aes(Block, SuccessRate)) +
   geom_boxplot(outlier.shape = NA) +
-  geom_line(aes(group = Volunteer),
-            alpha = 0.3, color = "grey40") +
-  geom_point(size = 2, alpha = 0.7) +                # aligned with the lines
+  geom_line(
+    aes(group = Volunteer),
+    alpha = 0.3,
+    color = "grey40"
+  ) +
+  geom_point(size = 2, alpha = 0.7) +
   stat_pvalue_manual(
     dunn_sig,
-    label      = "p.adj.signif",
-    tip.length = 0.01,
-    size       = 6                                   # bigger significance labels
+    label        = "p.adj.signif",
+    tip.length   = 0.005,
+    size         = 5,
+    bracket.size = 0.5
   ) +
-  coord_cartesian(ylim = c(0.3, 1.02)) +
+  coord_cartesian(ylim = c(0.3, 1.15), clip = "off") +
   big_theme +
+  theme(
+    plot.margin = margin(10, 10, 10, 10)
+  ) +
   labs(y = "Success Rate", x = "Block")
 
 print(p_sig)
 
-# ggsave(
-#   "sucessRate_plot_significance.png",
-#   plot = p_sig,
-#   width = 10,
-#   height = 6,
-#   dpi = 300
-# )
+ggsave(
+  filename = "sucessRate_plot_significance.pdf",
+  plot = p_sig,
+  width = 180,
+  height = 120,
+  units = "mm",
+  device = cairo_pdf
+)
