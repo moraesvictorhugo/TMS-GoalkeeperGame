@@ -33,7 +33,7 @@ library(ggplot2)
 # 2. DATA IMPORT
 ###############################################################
 
-df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
+df <- read.csv("/home/victormoraes/MEGA/Backup_MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
 
 
 ###############################################################
@@ -199,14 +199,14 @@ p_FDS_robust <- p_FDS_robust +
 
 print(p_FDS_robust)
 
-ggsave(
-  filename = "FDS_robust_triple_interaction.pdf",
-  plot = p_FDS_robust,
-  width = 180,
-  height = 120,
-  units = "mm",
-  device = cairo_pdf
-)
+# ggsave(
+#   filename = "FDS_robust_triple_interaction.pdf",
+#   plot = p_FDS_robust,
+#   width = 180,
+#   height = 120,
+#   units = "mm",
+#   device = cairo_pdf
+# )
 
 ###############################################################
 #                                                             #

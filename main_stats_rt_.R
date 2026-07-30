@@ -32,7 +32,7 @@ library(ggplot2)
 # 2. DATA IMPORT
 ###############################################################
 
-df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
+df <- read.csv("/home/victormoraes/MEGA/Backup_MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
 
 
 ###############################################################
@@ -304,8 +304,8 @@ print(p_RT_PxE)
 
 # Save fig
 # Salva em PNG 900 dpi
-ggsave("plot_RT_PxE.png", plot = p_RT_PxE,
-       width = 7, height = 5, units = "in", dpi = 600)
+# ggsave("plot_RT_PxE.png", plot = p_RT_PxE,
+#        width = 7, height = 5, units = "in", dpi = 600)
 
 # --- Plot 2: Predictability × Block (collapsed over Error_Prev) ---
 df_plot_PxB <- as.data.frame(emm_PxB_RT)
@@ -358,14 +358,14 @@ p_RT <- p_RT +
 
 print(p_RT)
 
-ggsave(
-  filename = "RT_simple.pdf",
-  plot = p_RT,
-  width = 180,
-  height = 100,
-  units = "mm",
-  device = cairo_pdf
-)
+# ggsave(
+#   filename = "RT_simple.pdf",
+#   plot = p_RT,
+#   width = 180,
+#   height = 100,
+#   units = "mm",
+#   device = cairo_pdf
+# )
 
 ###############################################################
 #                                                             #

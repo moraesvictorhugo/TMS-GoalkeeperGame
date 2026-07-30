@@ -33,7 +33,7 @@ library(ggplot2)
 # 2. DATA IMPORT
 ###############################################################
 
-df <- read.csv("~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
+df <- read.csv("/home/victormoraes/MEGA/Backup_MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
 
 ###############################################################
 # 3. FDI - PREPROCESSING
@@ -209,14 +209,14 @@ p_FDI_robust <- p_FDI_robust +
 
 print(p_FDI_robust)
 
-ggsave(
-  filename = "FDI_robust_triple_interaction.pdf",
-  plot = p_FDI_robust,
-  width = 180,
-  height = 120,
-  units = "mm",
-  device = cairo_pdf
-)
+# ggsave(
+#   filename = "FDI_robust_triple_interaction.pdf",
+#   plot = p_FDI_robust,
+#   width = 180,
+#   height = 120,
+#   units = "mm",
+#   device = cairo_pdf
+# )
 
 ###############################################################
 #                                                             #
