@@ -32,7 +32,7 @@ library(ggplot2)
 # 2. DATA IMPORT
 ###############################################################
 
-df <- read.csv("/home/victormoraes/MEGA/Backup_MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
+df <- read.csv("~/pCloudDrive/pCloud Sync/Projects/Manuscript_TMS-GKg/data/df_gkg-tms_2.csv")
 
 
 ###############################################################
@@ -303,7 +303,7 @@ p_RT_PxE <- ggplot(df_plot_PxE,
 print(p_RT_PxE)
 
 # Save fig
-# Salva em PNG 900 dpi
+# Save in PNG 900 dpi
 # ggsave("plot_RT_PxE.png", plot = p_RT_PxE,
 #        width = 7, height = 5, units = "in", dpi = 600)
 

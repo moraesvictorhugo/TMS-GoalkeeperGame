@@ -33,7 +33,7 @@ library(ggplot2)
 # 2. DATA IMPORT
 ###############################################################
 
-df <- read.csv("/home/victormoraes/MEGA/Backup_MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv")
+df <- read.csv("~/pCloudDrive/pCloud Sync/Projects/Manuscript_TMS-GKg/data/df_gkg-tms_2.csv")
 
 ###############################################################
 # 3. FDI - PREPROCESSING

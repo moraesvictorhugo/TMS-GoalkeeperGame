@@ -21,7 +21,7 @@ library(ggplot2)
 #    further down (we only plot to screen for now).
 # -----------------------------------------------------------------------------
 out_dir   <- "analysis_outputs"
-data_file <- "~/MEGA/Archive/PhD IBCCF-UFRJ/PhD/EMT no Jogo do goleiro/Data processing/data_TMS-GKg/Processed_data/2025-11-18/df_gkg-tms_2.csv"
+data_file <- "~/pCloudDrive/pCloud Sync/Projects/Manuscript_TMS-GKg/data/df_gkg-tms_2.csv"
 
 # dir.create(out_dir, showWarnings = FALSE)  # uncomment only when saving figures
 
