@@ -183,7 +183,7 @@ p_FDS_robust <- p_FDS_robust +
   ) +
   labs(
     x = "Random transition result",
-    y = "EMM of MEP amplitude in FDI (µV)",
+    y = "EMM of MEP amplitude in FDS (µV)",
     color = "Predictability"
   ) +
   theme(
